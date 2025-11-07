@@ -94,6 +94,34 @@ const authSlice = createSlice({
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
+
+    // Convenience actions (matching TEO-ADMIN pattern)
+    setAuthLoading: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+      state.error = null;
+    },
+    setAuthSuccess: (state, action: PayloadAction<User>) => {
+      state.user = action.payload;
+      state.isAuthenticated = true;
+      state.isLoading = false;
+      state.error = null;
+    },
+    setAuthFailure: (state, action: PayloadAction<string | null>) => {
+      state.error = action.payload;
+      state.isLoading = false;
+      if (action.payload) {
+        // Only clear auth if there's an error
+        // Don't clear tokens to preserve offline access
+      }
+    },
+    clearAuth: (state) => {
+      state.user = null;
+      state.accessToken = null;
+      state.refreshToken = null;
+      state.isAuthenticated = false;
+      state.isLoading = false;
+      state.error = null;
+    },
   },
 });
 
@@ -109,6 +137,10 @@ export const {
   setTokens,
   clearError,
   setLoading,
+  setAuthLoading,
+  setAuthSuccess,
+  setAuthFailure,
+  clearAuth,
 } = authSlice.actions;
 
 export default authSlice.reducer;
