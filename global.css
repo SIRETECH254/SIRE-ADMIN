@@ -1,3 +1,10 @@
+/**
+ * SIRE TECH Admin - Global Styles
+ * 
+ * This file imports Tailwind CSS utilities and NativeWind theme.
+ * Brand colors, typography, and spacing are configured in tailwind.config.js
+ */
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
