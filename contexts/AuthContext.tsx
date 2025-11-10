@@ -332,7 +332,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log('Logged out successfully!');
 
       // Navigate to login page
-      router.replace('/login');
+      router.replace('/(public)/login');
     }
   };
 
