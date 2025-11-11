@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
 import { useDispatch } from 'react-redux';
 
 import { Alert } from '@/components/ui/Alert';
@@ -28,6 +29,12 @@ type InlineStatus =
     }
   | null;
 
+type AvatarAsset = {
+  uri: string;
+  name: string;
+  type: string;
+};
+
 export default function EditProfileScreen() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -43,13 +50,18 @@ export default function EditProfileScreen() {
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [inlineStatus, setInlineStatus] = useState<InlineStatus>(null);
-  const [isAvatarHintVisible, setIsAvatarHintVisible] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<AvatarAsset | null>(null);
+  const [avatarRemoved, setAvatarRemoved] = useState(false);
 
   useEffect(() => {
     if (profile) {
       setFirstName(profile.firstName ?? '');
       setLastName(profile.lastName ?? '');
       setPhone(profile.phone ?? '');
+      setAvatarUri(profile.avatar ?? null);
+      setAvatarFile(null);
+      setAvatarRemoved(false);
     }
   }, [profile]);
 
@@ -72,6 +84,69 @@ export default function EditProfileScreen() {
     }
   }, [inlineStatus]);
 
+  const handleChangeAvatar = useCallback(async () => {
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        setInlineStatus({
+          type: 'error',
+          text: 'Photo library access is required to change your avatar.',
+        });
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+
+      if (result.canceled) {
+        return;
+      }
+
+      const asset = result.assets?.[0];
+      if (!asset) {
+        return;
+      }
+
+      const assetName = asset.fileName ?? `avatar-${Date.now()}.jpg`;
+      const assetType = asset.mimeType ?? 'image/jpeg';
+
+      setAvatarUri(asset.uri);
+      setAvatarFile({
+        uri: asset.uri,
+        name: assetName,
+        type: assetType,
+      });
+      setAvatarRemoved(false);
+      resetInlineStatus();
+    } catch (err) {
+      setInlineStatus({
+        type: 'error',
+        text: 'Unable to open your photo library right now. Please try again.',
+      });
+    }
+  }, [resetInlineStatus]);
+
+  const handleRemoveAvatar = useCallback(() => {
+    setAvatarUri(null);
+    setAvatarFile(null);
+    setAvatarRemoved(true);
+    resetInlineStatus();
+  }, [resetInlineStatus]);
+
+  const currentAvatar = useMemo(() => {
+    if (avatarRemoved) {
+      return null;
+    }
+    if (avatarUri) {
+      return avatarUri;
+    }
+    return profile?.avatar ?? null;
+  }, [avatarRemoved, avatarUri, profile?.avatar]);
+
   const handleSave = useCallback(async () => {
     const trimmedFirst = firstName.trim();
     const trimmedLast = lastName.trim();
@@ -88,11 +163,39 @@ export default function EditProfileScreen() {
     setInlineStatus(null);
 
     try {
-      const result = await mutateAsync({
+      let payload: any = {
         firstName: trimmedFirst,
         lastName: trimmedLast,
         phone: trimmedPhone || undefined,
-      });
+      };
+
+      if (avatarFile) {
+        const formData = new FormData();
+        formData.append('firstName', trimmedFirst);
+        formData.append('lastName', trimmedLast);
+        if (trimmedPhone) {
+          formData.append('phone', trimmedPhone);
+        }
+        if (Platform.OS === 'web') {
+          const fileResponse = await fetch(avatarFile.uri);
+          const blob = await fileResponse.blob();
+          formData.append('avatar', blob, avatarFile.name);
+        } else {
+          formData.append('avatar', {
+            uri: avatarFile.uri,
+            name: avatarFile.name,
+            type: avatarFile.type,
+          } as any);
+        }
+        payload = formData;
+      } else if (avatarRemoved) {
+        payload = {
+          ...payload,
+          avatar: null,
+        };
+      }
+
+      const result = await mutateAsync(payload);
 
       const updatedUser = result?.data?.user ?? result?.user;
       if (updatedUser) {
@@ -114,7 +217,16 @@ export default function EditProfileScreen() {
         'Unable to update profile right now.';
       setInlineStatus({ type: 'error', text: message });
     }
-  }, [dispatch, firstName, lastName, mutateAsync, phone, router]);
+  }, [
+    avatarFile,
+    avatarRemoved,
+    dispatch,
+    firstName,
+    lastName,
+    mutateAsync,
+    phone,
+    router,
+  ]);
 
   const handleCancel = () => {
     router.back();
@@ -139,11 +251,13 @@ export default function EditProfileScreen() {
 
             <View className="mt-8 items-center gap-3">
               <Pressable
-                onPress={() => setIsAvatarHintVisible(true)}
-                className="items-center justify-center">
-                {profile?.avatar ? (
+                onPress={handleChangeAvatar}
+                className="items-center justify-center"
+                accessibilityRole="button"
+                accessibilityLabel="Change avatar">
+                {currentAvatar ? (
                   <Image
-                    source={{ uri: profile.avatar }}
+                    source={{ uri: currentAvatar }}
                     resizeMode="cover"
                     className="h-28 w-28 rounded-full border-4 border-white shadow-md"
                   />
@@ -155,17 +269,19 @@ export default function EditProfileScreen() {
                   </View>
                 )}
                 <Text className="mt-2 font-inter text-sm text-brand-primary">
-                  Change avatar (coming soon)
+                  Tap to change avatar
                 </Text>
               </Pressable>
-              {isAvatarHintVisible && (
-                <Alert
-                  variant="info"
-                  message="Avatar uploads will be available in a future update."
-                  dismissible
-                  onDismiss={() => setIsAvatarHintVisible(false)}
-                  className="w-full"
-                />
+              {(currentAvatar || avatarRemoved) && (
+                <Pressable
+                  onPress={handleRemoveAvatar}
+                  className="rounded-xl border border-transparent px-4 py-2"
+                  accessibilityRole="button"
+                  accessibilityLabel="Remove avatar">
+                  <Text className="font-inter text-sm font-semibold text-brand-accent">
+                    Remove avatar
+                  </Text>
+                </Pressable>
               )}
             </View>
 

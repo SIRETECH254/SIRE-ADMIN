@@ -16,7 +16,7 @@
 Both profile screens rely on shared layout, themed helpers and TanStack Query hooks:
 
 ```tsx
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -29,9 +29,12 @@ import {
   View,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import { useDispatch } from 'react-redux';
 
 import { useGetProfile, useUpdateProfile } from '@/tanstack/useUsers';
 import { useAuth } from '@/contexts/AuthContext';
+import { updateUser } from '@/redux/slices/authSlice';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { ThemedText } from '@/components/themed-text';
@@ -47,13 +50,15 @@ import { ThemedView } from '@/components/themed-view';
 - `useGetProfile()` powers the read view. Response shape: `{ success, data: { user } }`.
 - `useUpdateProfile()` handles form submission, invalidates the profile query and logs success.
 - `useAuth()` supplies `user` (for initial values, initials fallback) and `logout()`.
-- Local component state:
+- `useDispatch()` (Redux) lets the edit screen call `updateUser` once the mutation resolves.
+- Local component state & helpers:
   - `inlineStatus`: success / error messaging for the edit form.
-  - `formState`: controlled inputs for `firstName`, `lastName`, `phone`, plus disabled `email`.
-  - `isSubmitting`: gates repeated submissions.
-- Derived helpers:
-  - `userInitials` memoised from name fields.
-  - `profileData` unwrapped from query response with graceful fallbacks.
+  - `firstName`, `lastName`, `phone`: controlled inputs, initialised via `useEffect` whenever `profile` changes.
+  - `avatarUri`: string pointing at the preview image (server-hosted or locally picked).
+  - `avatarFile`: `{ uri, name, type }` payload ready for `FormData` uploads (native only).
+  - `avatarRemoved`: boolean flag that indicates the user cleared their avatar; drives `avatar: null` payloads.
+  - `isBusy`: derived from the mutation’s `isPending` flag.
+  - `initials`, `currentAvatar`: memoised fallbacks used across both overview and edit UIs.
 
 ### Profile Overview UI
 - Overall layout: `ThemedView` → `ScrollView` so long bios fit comfortably.
@@ -68,7 +73,10 @@ import { ThemedView } from '@/components/themed-view';
 
 ### Edit Profile UI
 - Screen title: “Edit Profile”. Uses `KeyboardAvoidingView` + `ScrollView` for mobile ergonomics.
-- Avatar picker block sits at the top; currently presents an actionable `Pressable` that triggers a placeholder handler (no upload API yet) while keeping layout ready for future integration.
+- Avatar picker block:
+  - `Pressable` opens the system library via Expo `ImagePicker`.
+  - Successful selection updates the preview immediately and stores the file metadata for submission.
+  - A “Remove avatar” CTA appears when an avatar exists (either from the API or a newly picked file). Tapping it clears local state and sends `avatar: null` on save.
 - Form inputs:
   - `TextInput` for `firstName`, `lastName`, `phone` (phone optional per backend schema).
   - Email shown but locked for editing (disabled field with grey styling).
@@ -85,13 +93,17 @@ import { ThemedView } from '@/components/themed-view';
 | Last Name | `lastName` | Required. Trimmed before submission. |
 | Email | `email` | Read-only in UI to avoid accidental changes. |
 | Phone | `phone` | Optional. Normalised by trimming whitespace. |
-| Avatar (Coming Soon) | `avatar` | Visual element only; upload flow deferred. |
+| Avatar | `avatar` | Tap to pick a new image; native builds send multipart `FormData`, web fetches the blob before append. Removing the avatar sends `avatar: null`. |
 
 ### Mutation & Cache Behaviour
 - On success the mutation handler:
   - Invalidates `['user','profile']` query (handled inside hook).
-  - Dispatches `updateUser(updatedUser)` to refresh Redux/auth state so headers reflect the new name without a relog.
+  - Dispatches `updateUser(updatedUser)` to refresh Redux/auth state so headers reflect the new avatar and name without a relog.
   - Shows a success `Alert` and navigates back after a short delay.
+- Payload logic:
+  - When `avatarFile` is present the screen builds a `FormData` payload (`firstName`, `lastName`, optional `phone`, `avatar` file).
+  - Web targets fetch the local URI first (to obtain a `Blob`) before appending.
+  - When the user removes the avatar the mutation sends JSON `{ avatar: null, firstName, lastName, phone? }`.
 - On error the inline status block renders the backend message from `error.response?.data?.message`.
 
 ### Navigation Flow
@@ -106,7 +118,7 @@ import { ThemedView } from '@/components/themed-view';
 - Network failures do not mutate stored profile — the UI keeps previous values until a successful response arrives.
 
 ### Future Enhancements
-- Integrate avatar upload (likely to `PUT /api/users/profile` with multipart support once backend allows file storage).
 - Add proper phone number masking and validation.
 - Display audit history (last login, last password change) once exposed by the API.
 - Consider optimistic updates by writing directly to the profile query cache when backend latency is high.
+- Support camera capture in addition to library selection for the avatar picker.
