@@ -196,7 +196,7 @@ export default function ProfileScreen() {
               </View>
             </View>
           </View>
-        </View>
+      </View>
       </ScrollView>
     </ThemedView>
   );

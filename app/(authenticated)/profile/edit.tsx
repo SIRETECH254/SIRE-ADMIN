@@ -171,9 +171,7 @@ export default function EditProfileScreen() {
 
             <View className="mt-10 gap-5">
               <View className="gap-2">
-                <Text className="font-inter text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  First name
-                </Text>
+                <Text className="form-label">First name</Text>
                 <TextInput
                   value={firstName}
                   onChangeText={(value) => {
@@ -182,14 +180,12 @@ export default function EditProfileScreen() {
                   }}
                   autoCapitalize="words"
                   placeholder="Jane"
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                  className="form-input"
                 />
               </View>
 
               <View className="gap-2">
-                <Text className="font-inter text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Last name
-                </Text>
+                <Text className="form-label">Last name</Text>
                 <TextInput
                   value={lastName}
                   onChangeText={(value) => {
@@ -198,26 +194,22 @@ export default function EditProfileScreen() {
                   }}
                   autoCapitalize="words"
                   placeholder="Doe"
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                  className="form-input"
                 />
               </View>
 
               <View className="gap-2">
-                <Text className="font-inter text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Email
-                </Text>
+                <Text className="form-label">Email</Text>
                 <TextInput
                   value={profile?.email ?? ''}
                   editable={false}
                   selectTextOnFocus={false}
-                  className="rounded-xl border border-gray-200 bg-gray-100 px-4 py-3 text-base text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+                  className="form-input-disabled"
                 />
               </View>
 
               <View className="gap-2">
-                <Text className="font-inter text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Phone (optional)
-                </Text>
+                <Text className="form-label">Phone (optional)</Text>
                 <TextInput
                   value={phone}
                   onChangeText={(value) => {
@@ -226,7 +218,7 @@ export default function EditProfileScreen() {
                   }}
                   keyboardType="phone-pad"
                   placeholder="e.g. +254712345678"
-                  className="rounded-xl border border-gray-300 bg-white px-4 py-3 text-base text-gray-900 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                  className="form-input"
                 />
               </View>
             </View>
@@ -244,19 +236,19 @@ export default function EditProfileScreen() {
                 <Pressable
                   onPress={handleCancel}
                   disabled={isBusy}
-                  className="rounded-xl border border-gray-300 px-4 py-3 dark:border-gray-700">
-                  <Text className="font-inter text-base font-semibold text-gray-700 dark:text-gray-300">
+                  className="btn btn-secondary">
+                  <Text className="btn-text btn-text-secondary">
                     Cancel
                   </Text>
                 </Pressable>
                 <Pressable
                   onPress={handleSave}
                   disabled={isBusy}
-                  className="min-w-[140px] items-center rounded-xl bg-brand-primary px-4 py-3 disabled:bg-disabled">
+                  className="btn btn-primary min-w-[140px]">
                   {isBusy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (
-                    <Text className="font-inter text-base font-semibold text-white">
+                    <Text className="btn-text btn-text-primary">
                       Save changes
                     </Text>
                   )}

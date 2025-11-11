@@ -132,7 +132,7 @@ export default function ResetPasswordScreen() {
 
               <View className="space-y-5">
                 <View className="w-full space-y-2">
-                  <Text className="text-base font-semibold text-gray-800">New password</Text>
+                  <Text className="form-label">New password</Text>
                   <View className="relative w-full">
                     <TextInput
                       value={password}
@@ -144,7 +144,7 @@ export default function ResetPasswordScreen() {
                       textContentType="newPassword"
                       secureTextEntry={!isPasswordVisible}
                       placeholder="••••••••"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-20 text-base text-gray-900"
+                      className="form-input pr-12"
                     />
                     <Pressable
                       onPress={() => setIsPasswordVisible((prev) => !prev)}
@@ -160,9 +160,7 @@ export default function ResetPasswordScreen() {
                 </View>
 
                 <View className="w-full space-y-2">
-                  <Text className="text-base font-semibold text-gray-800">
-                    Confirm password
-                  </Text>
+                  <Text className="form-label">Confirm password</Text>
                   <View className="relative w-full">
                     <TextInput
                       value={confirmPassword}
@@ -174,7 +172,7 @@ export default function ResetPasswordScreen() {
                       textContentType="password"
                       secureTextEntry={!isConfirmPasswordVisible}
                       placeholder="••••••••"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-20 text-base text-gray-900"
+                      className="form-input pr-12"
                     />
                     <Pressable
                       onPress={() => setIsConfirmPasswordVisible((prev) => !prev)}
@@ -193,17 +191,12 @@ export default function ResetPasswordScreen() {
 
                 {statusMessage ? (
                   <View
-                    className={`rounded-lg px-3 py-2 ${
+                    className={
                       statusMessage.type === 'success'
-                        ? 'bg-green-100'
-                        : 'bg-brand-accent/10'
-                    }`}>
-                    <Text
-                      className={`text-sm ${
-                        statusMessage.type === 'success'
-                          ? 'text-green-700'
-                          : 'text-brand-accent'
-                      }`}>
+                        ? 'form-message-success'
+                        : 'form-message-error'
+                    }>
+                    <Text className="text-sm">
                       {statusMessage.text}
                     </Text>
                   </View>
@@ -212,11 +205,11 @@ export default function ResetPasswordScreen() {
                 <Pressable
                   onPress={handleSubmit}
                   disabled={!canSubmit}
-                  className="mt-2 w-full items-center justify-center rounded-xl bg-brand-primary py-3 disabled:bg-disabled">
+                  className="btn btn-primary mt-2 w-full disabled:opacity-70">
                   {isBusy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (
-                    <Text className="text-base font-semibold text-white">Update password</Text>
+                    <Text className="btn-text btn-text-primary">Update password</Text>
                   )}
                 </Pressable>
               </View>
