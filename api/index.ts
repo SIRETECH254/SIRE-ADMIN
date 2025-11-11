@@ -389,7 +389,12 @@ export const userAPI = {
   getProfile: () => api.get('/api/users/profile'),
 
   // Update own profile
-  updateProfile: (profileData: any) => api.put('/api/users/profile', profileData),
+  updateProfile: (profileData: any) =>
+    profileData instanceof FormData
+      ? api.put('/api/users/profile', profileData, {
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
+      : api.put('/api/users/profile', profileData),
 
   // Change password
   changePassword: (passwordData: any) => api.put('/api/users/change-password', passwordData),

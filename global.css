@@ -9,3 +9,69 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer components {
+  .form-label {
+    @apply font-inter text-sm font-semibold text-gray-700 dark:text-gray-300;
+  }
+
+  .form-input {
+    @apply w-full rounded-xl border border-gray-300 bg-white px-4 py-3 text-base font-inter text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100;
+  }
+
+  .form-input-disabled {
+    @apply form-input border-gray-200 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400;
+  }
+
+  .btn {
+    @apply flex-row items-center justify-center rounded-xl px-4 py-3;
+  }
+
+  .btn-primary {
+    @apply btn bg-brand-primary disabled:bg-disabled;
+  }
+
+  .btn-secondary {
+    @apply btn border border-gray-300 bg-white dark:border-gray-700 dark:bg-gray-900;
+  }
+
+  .btn-ghost {
+    @apply btn bg-transparent;
+  }
+
+  .btn-text {
+    @apply font-inter text-base font-semibold;
+  }
+
+  .btn-text-primary {
+    @apply btn-text text-white;
+  }
+
+  .btn-text-secondary {
+    @apply btn-text text-gray-700 dark:text-gray-300;
+  }
+
+  .form-message {
+    @apply rounded-lg px-3 py-2 text-sm font-inter;
+  }
+
+  .form-message-error {
+    @apply form-message bg-brand-accent/10 text-brand-accent;
+  }
+
+  .form-message-success {
+    @apply form-message bg-emerald-100 text-emerald-700;
+  }
+
+  .badge-soft {
+    @apply rounded-full bg-brand-tint px-3 py-1 font-inter text-sm font-medium text-brand-primary;
+  }
+
+  .badge-success {
+    @apply rounded-full bg-emerald-100 px-3 py-1 font-inter text-sm font-medium text-emerald-700;
+  }
+
+  .badge-error {
+    @apply rounded-full bg-brand-accent/10 px-3 py-1 font-inter text-sm font-medium text-brand-accent;
+  }
+}
+

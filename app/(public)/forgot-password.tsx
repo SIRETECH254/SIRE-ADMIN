@@ -101,7 +101,7 @@ export default function ForgotPasswordScreen() {
 
               <View className="space-y-5">
                 <View className="w-full space-y-2">
-                  <Text className="text-base font-semibold text-gray-800">Email</Text>
+                  <Text className="form-label">Email</Text>
                   <TextInput
                     value={email}
                     onChangeText={(value) => {
@@ -112,23 +112,18 @@ export default function ForgotPasswordScreen() {
                     autoComplete="email"
                     keyboardType="email-address"
                     placeholder="admin@example.com"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900"
+                    className="form-input"
                   />
                 </View>
 
                 {errorMessage ? (
                   <View
-                    className={`rounded-lg px-3 py-2 ${
+                    className={
                       errorMessage.type === 'success'
-                        ? 'bg-green-100'
-                        : 'bg-brand-accent/10'
-                    }`}>
-                    <Text
-                      className={`text-sm ${
-                        errorMessage.type === 'success'
-                          ? 'text-green-700'
-                          : 'text-brand-accent'
-                      }`}>
+                        ? 'form-message-success'
+                        : 'form-message-error'
+                    }>
+                    <Text className="text-sm">
                       {errorMessage.text}
                     </Text>
                   </View>
@@ -137,11 +132,11 @@ export default function ForgotPasswordScreen() {
                 <Pressable
                   onPress={handleSubmit}
                   disabled={isBusy}
-                  className="mt-2 w-full items-center justify-center rounded-xl bg-brand-primary py-3 disabled:bg-disabled">
+                  className="btn btn-primary mt-2 w-full">
                   {isBusy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (
-                    <Text className="text-base font-semibold text-white">Send reset link</Text>
+                    <Text className="btn-text btn-text-primary">Send reset link</Text>
                   )}
                 </Pressable>
               </View>

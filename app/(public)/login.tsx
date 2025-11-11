@@ -93,9 +93,7 @@ export default function LoginScreen() {
 
               <View className="space-y-5">
                 <View className="w-full space-y-2">
-                  <Text className="text-base font-semibold text-gray-800">
-                    Email
-                  </Text>
+                  <Text className="form-label">Email</Text>
                   <TextInput
                     value={email}
                     onChangeText={(value) => {
@@ -106,14 +104,12 @@ export default function LoginScreen() {
                     autoComplete="email"
                     keyboardType="email-address"
                     placeholder="admin@example.com"
-                    className="w-full rounded-lg border border-gray-300 px-4 py-3 text-base text-gray-900"
+                    className="form-input"
                   />
                 </View>
 
                 <View className="w-full space-y-2">
-                  <Text className="text-base font-semibold text-gray-800">
-                    Password
-                  </Text>
+                  <Text className="form-label">Password</Text>
                   <View className="relative w-full">
                     <TextInput
                       value={password}
@@ -125,7 +121,7 @@ export default function LoginScreen() {
                       textContentType="password"
                       secureTextEntry={!isPasswordVisible}
                       placeholder="••••••••"
-                      className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-20 text-base text-gray-900"
+                      className="form-input pr-12"
                     />
                     <Pressable
                       onPress={() => setIsPasswordVisible((prev) => !prev)}
@@ -163,7 +159,7 @@ export default function LoginScreen() {
                 </View>
 
                 {errorMessage ? (
-                  <Text className="rounded-lg bg-brand-accent/10 px-3 py-2 text-sm text-brand-accent">
+                  <Text className="form-message-error">
                     {errorMessage}
                   </Text>
                 ) : null}
@@ -171,11 +167,11 @@ export default function LoginScreen() {
                 <Pressable
                   onPress={onSubmit}
                   disabled={isBusy}
-                  className="mt-2 w-full items-center justify-center rounded-xl bg-brand-primary py-3 disabled:bg-disabled">
+                  className="btn btn-primary mt-2 w-full">
                   {isBusy ? (
                     <ActivityIndicator color="#ffffff" />
                   ) : (
-                    <Text className="text-base font-semibold text-white">
+                    <Text className="btn-text btn-text-primary">
                       Sign in
                     </Text>
                   )}

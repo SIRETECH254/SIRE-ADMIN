@@ -33,6 +33,14 @@ export function Header({ onToggleSidebar, isSidebarOpen }: HeaderProps) {
     return initials || 'U';
   }, [user]);
 
+  const userAvatar = useMemo(() => {
+    const avatar = user?.avatar;
+    if (typeof avatar === 'string' && avatar.trim().length > 0) {
+      return avatar.trim();
+    }
+    return null;
+  }, [user?.avatar]);
+
   const handleLogout = async () => {
     setIsMenuOpen(false);
     await logout();
@@ -90,10 +98,18 @@ export function Header({ onToggleSidebar, isSidebarOpen }: HeaderProps) {
             onPress={() => setIsMenuOpen((prev) => !prev)}
             accessibilityRole="button"
             accessibilityLabel="Account menu"
-            className="h-10 w-10 items-center justify-center rounded-full bg-brand-primary">
-            <Text className="font-inter text-base font-semibold text-white">
-              {userInitials}
-            </Text>
+            className={`h-10 w-10 overflow-hidden rounded-full ${userAvatar ? '' : 'items-center justify-center bg-brand-primary'}`}>
+            {userAvatar ? (
+              <Image
+                source={{ uri: userAvatar }}
+                resizeMode="cover"
+                style={{ height: 40, width: 40 }}
+              />
+            ) : (
+              <Text className="font-inter text-base font-semibold text-white">
+                {userInitials}
+              </Text>
+            )}
           </Pressable>
           {isMenuOpen && (
             <View className="absolute right-0 z-10 mt-3 w-56 rounded-xl border border-gray-200 bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-900">

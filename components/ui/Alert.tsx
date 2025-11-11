@@ -20,12 +20,17 @@ export function Alert({
   ...props
 }: AlertProps) {
   const variantStyles = {
-    success: 'bg-brand-soft',
+    success: 'bg-emerald-100 border border-emerald-200',
     error: 'bg-brand-accent',
-    info: 'bg-brand-tint',
+    info: 'bg-brand-tint border border-brand-tint/50',
   };
 
-  const textColor = variant === 'info' ? 'text-black' : 'text-white';
+  const textColor =
+    variant === 'success'
+      ? 'text-emerald-800'
+      : variant === 'info'
+      ? 'text-gray-900'
+      : 'text-white';
 
   return (
     <View
