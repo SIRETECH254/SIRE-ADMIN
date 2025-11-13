@@ -7,6 +7,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import { Loading } from '@/components/ui/Loading';
 import { ThemedView } from '@/components/themed-view';
+import { getInitials, formatDate as formatDateUtil } from '@/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeToggle } from '@/hooks/use-theme-toggle';
 import { useGetProfile } from '@/tanstack/useUsers';
@@ -27,31 +28,9 @@ export default function ProfileScreen() {
     return data?.data?.user ?? user ?? null;
   }, [data?.data?.user, user]);
 
-  const initials = useMemo(() => {
-    if (!profile) return '?';
-    const parts = [profile.firstName, profile.lastName].filter(Boolean);
-    if (parts.length === 0) {
-      return profile.email?.[0]?.toUpperCase() ?? '?';
-    }
-    return parts
-      .map((value: string) => value.charAt(0).toUpperCase())
-      .join('');
-  }, [profile]);
+  const initials = useMemo(() => getInitials(profile ? { firstName: profile?.firstName, lastName: profile?.lastName, email: profile?.email } : null), [profile]);
 
-  const formatDate = (value?: string) => {
-    if (!value) return '—';
-    try {
-      return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }).format(new Date(value));
-    } catch {
-      return value;
-    }
-  };
+  const formatDate = (value?: string) => formatDateUtil(value);
 
   const errorMessage =
     (error as any)?.response?.data?.message ??

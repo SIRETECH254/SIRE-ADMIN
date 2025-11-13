@@ -423,6 +423,10 @@ export const userAPI = {
   setUserAdmin: (userId: string, adminData: any) =>
     api.put(`/api/users/${userId}/admin`, adminData),
 
+  // Update user (admin) - full profile edit
+  updateUser: (userId: string, userData: any) =>
+    api.put(`/api/users/${userId}`, userData),
+
   // Get user roles (admin)
   getUserRoles: (userId: string) => api.get(`/api/users/${userId}/roles`),
 
