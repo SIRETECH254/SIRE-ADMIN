@@ -38,7 +38,16 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
     <View className="flex h-full w-72 border-r border-gray-200 bg-white px-4 pb-6 pt-8 shadow-2xl dark:border-gray-700 dark:bg-gray-950">
       <ScrollView contentContainerStyle={{ paddingBottom: 24 }} showsVerticalScrollIndicator={false}>
         {AUTH_NAV_ITEMS.map((item) => {
-          const isActive = pathname?.startsWith(item.href);
+          // Expo Router hides group segments like (authenticated) in the visible pathname on web.
+          // Normalize both current pathname and nav href by stripping group segments and trailing slashes.
+          const normalize = (p: string) =>
+            (p || '')
+              .replace(/\/\([^/]+\)/g, '') // strip any "(group)" segment
+              .replace(/\/+$/, ''); // strip trailing slash
+          const currentPath = normalize(pathname || '');
+          const targetPath = normalize(String(item.href));
+          const isActive =
+            currentPath === targetPath || currentPath.startsWith(targetPath + '/');
           return (
             <Pressable
               key={item.href}
