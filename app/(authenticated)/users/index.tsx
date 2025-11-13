@@ -6,7 +6,6 @@ import { Link, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Loading } from '@/components/ui/Loading';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { useGetAllUsers, useDeleteUser } from '@/tanstack/useUsers';
@@ -280,35 +279,88 @@ export default function UsersScreen() {
 
       {/* Content */}
       <View className="px-4 pb-6">
-        {errorMessage ? (
-          <Alert variant="error" message={errorMessage} className="mb-3" />
-        ) : null}
-
         <View className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          {isLoading ? (
-            <Loading />
-          ) : users.length === 0 ? (
-            <View className="py-14 items-center">
-              <MaterialIcons name="group" size={28} color="#7b1c1c" />
-              <Text className="mt-3 text-gray-700">No users yet</Text>
-              <Link href="/(authenticated)/users/create" className="btn btn-primary mt-4">
-                <Text className="btn-text btn-text-primary">Add User</Text>
-              </Link>
-            </View>
-          ) : (
-            <>
-              <ScrollView horizontal>
-                <View className="min-w-[900px]">
-                  <DataTable >
-                    <DataTable.Header>
-                      <DataTable.Title>User</DataTable.Title>
-                      <DataTable.Title>Email</DataTable.Title>
-                      <DataTable.Title>Role</DataTable.Title>
-                      <DataTable.Title>Status</DataTable.Title>
-                      <DataTable.Title>Created</DataTable.Title>
-                      <DataTable.Title numeric>Actions</DataTable.Title>
-                    </DataTable.Header>
-                    {users.map((u: any) => {
+          <ScrollView horizontal>
+            <View className="min-w-[900px]">
+              <DataTable >
+                <DataTable.Header>
+                  <DataTable.Title>User</DataTable.Title>
+                  <DataTable.Title>Email</DataTable.Title>
+                  <DataTable.Title>Role</DataTable.Title>
+                  <DataTable.Title>Status</DataTable.Title>
+                  <DataTable.Title>Created</DataTable.Title>
+                  <DataTable.Title numeric>Actions</DataTable.Title>
+                </DataTable.Header>
+
+                {/* Loading skeleton rows */}
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, idx) => (
+                      <DataTable.Row key={`skeleton-${idx}`}>
+                        <DataTable.Cell>
+                          <View className="flex-row items-center gap-3">
+                            <View className="h-8 w-8 rounded-full bg-gray-300 animate-pulse" />
+                            <View className="h-4 w-20 rounded-md bg-gray-300 animate-pulse" />
+                          </View>
+                        </DataTable.Cell>
+                        <DataTable.Cell>
+                          <View className="h-4 w-32 rounded-md bg-gray-300 animate-pulse" />
+                        </DataTable.Cell>
+                        <DataTable.Cell>
+                          <View className="h-5 w-12 rounded-md bg-gray-300 animate-pulse" />
+                        </DataTable.Cell>
+                        <DataTable.Cell>
+                          <View className="h-5 w-12 rounded-md bg-gray-300 animate-pulse" />
+                        </DataTable.Cell>
+                        <DataTable.Cell>
+                          <View className="h-4 w-24 rounded-md bg-gray-300 animate-pulse" />
+                        </DataTable.Cell>
+                        <DataTable.Cell numeric>
+                          <View className="flex-row justify-end gap-2">
+                            <View className="h-4 w-6 rounded-md bg-gray-300 animate-pulse" />
+                            <View className="h-4 w-6 rounded-md bg-gray-300 animate-pulse" />
+                            <View className="h-4 w-6 rounded-md bg-gray-300 animate-pulse" />
+                          </View>
+                        </DataTable.Cell>
+                      </DataTable.Row>
+                    ))
+                  : null}
+
+                {/* Error row */}
+                {!isLoading && errorMessage ? (
+                  <DataTable.Row>
+                    <DataTable.Cell>
+                      <View className="w-full py-3">
+                        <Alert variant="error" message={errorMessage} className="w-full" />
+                      </View>
+                    </DataTable.Cell>
+                    <DataTable.Cell />
+                    <DataTable.Cell />
+                    <DataTable.Cell />
+                    <DataTable.Cell />
+                    <DataTable.Cell />
+                  </DataTable.Row>
+                ) : null}
+
+                {/* Empty row */}
+                {!isLoading && !errorMessage && users.length === 0 ? (
+                  <DataTable.Row>
+                    <DataTable.Cell colSpan={6}>
+                      <View className="py-8">
+                        <View className="flex-row items-center gap-2">
+                          <MaterialIcons name="group" size={20} color="#7b1c1c" />
+                          <Text className="text-gray-700">No users found</Text>
+                        </View>
+                        <Link href="/(authenticated)/users/create" className="btn btn-primary mt-3 self-start">
+                          <Text className="btn-text btn-text-primary">Add User</Text>
+                        </Link>
+                      </View>
+                    </DataTable.Cell>
+                  </DataTable.Row>
+                ) : null}
+
+                {/* Data rows */}
+                {!isLoading && !errorMessage && users.length > 0
+                  ? users.map((u: any) => {
                       const id = u._id || u.id;
                       return (
                         <DataTable.Row key={id}>
@@ -355,20 +407,22 @@ export default function UsersScreen() {
                           </DataTable.Cell>
                         </DataTable.Row>
                       );
-                    })}
-                  </DataTable>
-                </View>
-              </ScrollView>
+                    })
+                  : null}
+              </DataTable>
+            </View>
+          </ScrollView>
 
-              <Pagination
-                currentPage={pagination?.page ?? currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                pageSize={itemsPerPage}
-                onPageChange={(p) => setCurrentPage(p)}
-              />
-            </>
-          )}
+          {/* Pagination: show only when more than one page */}
+          {totalPages > 1 ? (
+            <Pagination
+              currentPage={pagination?.page ?? currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={itemsPerPage}
+              onPageChange={(p) => setCurrentPage(p)}
+            />
+          ) : null}
         </View>
       </View>
       {/* Delete confirmation modal */}

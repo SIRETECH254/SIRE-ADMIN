@@ -77,7 +77,9 @@ import {
 - RN-compatible table using Views:
   - Header row with columns: Avatar/Name, Email, Role, Status, Created, Actions
   - Rows render user initials or avatar, then metadata
-  - Touch-friendly actions: View, Edit
+  - Touch-friendly actions: View, Edit, Delete
+- Header remains visible at all times; loading/error/empty render only in the table body.
+- Loading uses a 5-row skeleton with gray, animated placeholders matching cell shapes.
 - Includes a top toolbar:
   - Search input with debounce
   - Filters: Role, Status
@@ -85,13 +87,14 @@ import {
   - “Add User” primary action
 - Pagination:
   - Prev/Next buttons with current/total pages display
+  - Only shown when total pages > 1
 
 ### Details UI
 - Avatar or initials in a circle
 - Name, email, pills for role and active status
 - Contact panel (email, phone)
 - Account panel (role, active flag, created/updated)
-- Edit button leading to `/(authenticated)/users/[id]/edit`
+- Edit button placed below the avatar (centered), leading to `/(authenticated)/users/[id]/edit`
 
 ### Edit User UI
 - Title: “Edit User”
@@ -117,6 +120,7 @@ import {
 - Status filter options: `all | active | inactive`
 - Search: trims and debounces; passed as `search` param
 - Pagination params: `page`, `limit`
+- Rendering rule: pagination is hidden when total pages ≤ 1
 
 ### Mutation & Cache Behaviour
 - `useUpdateUser()` invalidates:
@@ -133,9 +137,37 @@ import {
 - “Add User” → `/(authenticated)/users/create.tsx`
 
 ### Error & Loading States
-- List: `Loading` spinner during initial fetch; empty state when no users
+- List:
+  - Loading: 5 skeleton rows (bg-gray-300, rounded, `animate-pulse`) in tbody; header remains visible.
+  - Error: a single full-width message row (rendered in first cell) with an inline `Alert`; header remains visible.
+  - Empty: a single full-width “No users found” row with quick CTA; header remains visible.
 - Details: `Loading` for fetch; `Alert` for errors
 - Edit/Create: disable buttons while submitting; inline success/error messages; safe retries
+
+### Wireframes
+
+Users List (loading/error/empty render inside tbody, header persists):
+
+```text
+┌────────────────────────────────────────────────────────────────────────────┐
+│ User            Email            Role      Status     Created     Actions  │
+├────────────────────────────────────────────────────────────────────────────┤
+│ ◯ ▒▒▒▒▒▒▒▒      ▒▒▒▒▒▒▒▒▒▒▒▒    ▒▒▒▒      ▒▒▒▒       ▒▒▒▒▒▒      ▒ ▒ ▒   │ ← Skeleton row x5
+│ …                                                                        … │
+└────────────────────────────────────────────────────────────────────────────┘
+```
+
+Users Detail (centered edit button below avatar):
+
+```text
+[ Avatar ]
+Name               [role][status]
+
+[ Edit User ]
+────────────────────────────────
+Contact Information …
+Account Details …
+```
 
 ### Future Enhancements
 - Bulk actions (activate/deactivate, role changes)

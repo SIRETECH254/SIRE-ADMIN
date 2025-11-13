@@ -39,14 +39,6 @@ export default function UserDetailsScreen() {
               <ThemedText type="title">User Details</ThemedText>
               <Text className="text-gray-600 mt-1">User ID: {id}</Text>
             </View>
-            <Pressable
-              onPress={() => router.push(`/(authenticated)/users/${id}/edit`)}
-              className="rounded-xl bg-brand-primary px-4 py-3"
-              accessibilityLabel="Edit user">
-              <Text className="font-inter text-base font-semibold text-white">
-                Edit User
-              </Text>
-            </Pressable>
           </View>
 
           {errorMessage ? (
@@ -80,6 +72,17 @@ export default function UserDetailsScreen() {
                 </Badge>
               </View>
             </View>
+          </View>
+          <View className="items-center">
+            <Pressable
+              onPress={() => router.push(`/(authenticated)/users/${id}/edit`)}
+              className="rounded-xl bg-brand-primary px-6 py-3"
+              accessibilityRole="button"
+              accessibilityLabel="Edit user">
+              <Text className="font-inter text-base font-semibold text-white">
+                Edit User
+              </Text>
+            </Pressable>
           </View>
 
           <View className="gap-6">
