@@ -66,6 +66,10 @@
   .form-message-success {
     @apply form-message bg-emerald-100 text-emerald-700;
   }
+  
+  .form-message-info {
+    @apply form-message bg-brand-tint text-black;
+  }
 
   .badge-soft {
     @apply rounded-full bg-brand-tint px-3 py-1 font-inter text-sm font-medium text-brand-primary;
@@ -77,6 +81,11 @@
 
   .badge-error {
     @apply rounded-full bg-brand-accent/10 px-3 py-1 font-inter text-sm font-medium text-brand-accent;
+  }
+  
+  /* Picker / Select wrapper */
+  .input-select {
+    @apply border border-gray-300 rounded-lg bg-white px-2 dark:border-gray-700 dark:bg-gray-900;
   }
 }
 

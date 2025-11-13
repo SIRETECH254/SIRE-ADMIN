@@ -28,6 +28,27 @@ export const useGetClient = (clientId: string) => {
   });
 };
 
+// Register client
+export const useRegisterClient = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (clientData: any) => {
+      const response = await clientAPI.registerClient(clientData);
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      console.log('Client created successfully');
+    },
+    onError: (error: any) => {
+      console.error('Create client error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to create client';
+      console.error('Error:', errorMessage);
+    },
+  });
+};
+
 // Update client
 export const useUpdateClient = () => {
   const queryClient = useQueryClient();
@@ -45,6 +66,28 @@ export const useUpdateClient = () => {
     onError: (error: any) => {
       console.error('Update client error:', error);
       const errorMessage = error.response?.data?.message || 'Failed to update client';
+      console.error('Error:', errorMessage);
+    },
+  });
+};
+
+// Update client status (admin)
+export const useUpdateClientStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ clientId, isActive }: { clientId: string; isActive: boolean }) => {
+      const response = await clientAPI.updateClientStatus(clientId, { isActive });
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['clients'] });
+      queryClient.invalidateQueries({ queryKey: ['client', variables.clientId] });
+      console.log('Client status updated successfully');
+    },
+    onError: (error: any) => {
+      console.error('Update client status error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to update client status';
       console.error('Error:', errorMessage);
     },
   });
