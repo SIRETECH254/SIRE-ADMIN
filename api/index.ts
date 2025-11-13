@@ -40,8 +40,14 @@ export const clientAPI = {
   // Get single client
   getClient: (id: string) => api.get(`/api/clients/${id}`),
 
+  // Register client (public)
+  registerClient: (clientData: any) => api.post('/api/clients/register', clientData),
+
   // Update client
   updateClient: (id: string, clientData: any) => api.put(`/api/clients/${id}`, clientData),
+
+  // Update client status (admin)
+  updateClientStatus: (id: string, statusData: any) => api.put(`/api/clients/${id}/status`, statusData),
 
   // Delete client (admin)
   deleteClient: (id: string) => api.delete(`/api/clients/${id}`),

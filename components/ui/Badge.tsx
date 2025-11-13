@@ -6,6 +6,7 @@ export interface BadgeProps extends Omit<ViewProps, 'children'> {
   children: ReactNode;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  icon?: ReactNode;
 }
 
 export function Badge({
@@ -13,14 +14,16 @@ export function Badge({
   children,
   size = 'md',
   className = '',
+  icon,
   ...props
 }: BadgeProps) {
-  const variantStyles = {
-    success: 'bg-brand-soft',
-    error: 'bg-brand-accent',
-    warning: 'bg-yellow-500',
-    info: 'bg-brand-tint',
-    default: 'bg-gray-200',
+  // Prefer global css utility classes for badges
+  const containerStyles = {
+    success: 'badge-success',
+    error: 'badge-error',
+    warning: 'rounded-full bg-yellow-100 px-3 py-1',
+    info: 'rounded-full bg-brand-tint px-3 py-1',
+    default: 'rounded-full bg-gray-200 px-3 py-1',
   };
 
   const sizeStyles = {
@@ -35,21 +38,23 @@ export function Badge({
     lg: 'text-base',
   };
 
-  const textColor =
-    variant === 'info' || variant === 'default'
-      ? variant === 'info'
-        ? 'text-black'
-        : 'text-gray-700'
-      : 'text-white';
+  // Explicit text colors to ensure visibility in React Native
+  const textColorByVariant = {
+    success: 'text-emerald-700',
+    error: 'text-brand-accent',
+    warning: 'text-yellow-700',
+    info: 'text-black',
+    default: 'text-gray-700',
+  } as const;
 
   return (
-    <View
-      className={`${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
-      {...props}>
-      <Text
-        className={`font-inter font-medium ${textSizeStyles[size]} ${textColor}`}>
-        {children}
-      </Text>
+    <View className={`${containerStyles[variant]} ${sizeStyles[size]} ${className}`} {...props}>
+      <View className="flex-row items-center gap-1">
+        {icon ? <View>{icon}</View> : null}
+        <Text className={`font-inter font-medium ${textSizeStyles[size]} ${textColorByVariant[variant]}`}>
+          {children}
+        </Text>
+      </View>
     </View>
   );
 }

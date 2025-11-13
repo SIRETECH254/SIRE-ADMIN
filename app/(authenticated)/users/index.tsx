@@ -187,7 +187,7 @@ export default function UsersScreen() {
           </View>
           <View className="flex-row gap-2 flex-wrap">
             {/* Role */}
-            <View className="border border-gray-300 rounded-lg bg-white px-2">
+            <View className="input-select">
               <View className="flex-row items-center">
                 <MaterialIcons name="admin-panel-settings" size={18} color="#9ca3af" />
                 <Picker
@@ -205,7 +205,7 @@ export default function UsersScreen() {
               </View>
             </View>
             {/* Status */}
-            <View className="border border-gray-300 rounded-lg bg-white px-2">
+            <View className="input-select">
               <View className="flex-row items-center">
                 <MaterialIcons name="verified-user" size={18} color="#9ca3af" />
                 <Picker
@@ -219,7 +219,7 @@ export default function UsersScreen() {
               </View>
             </View>
             {/* Rows per page */}
-            <View className="border border-gray-300 rounded-lg bg-white px-2">
+            <View className="input-select">
               <View className="flex-row items-center">
                 <MaterialIcons name="list" size={18} color="#9ca3af" />
                 <Picker
@@ -390,11 +390,25 @@ export default function UsersScreen() {
                           <DataTable.Cell>{u?.email ?? '—'}</DataTable.Cell>
                           {/* Role cell */}
                           <DataTable.Cell>
-                            <Badge variant="info" size="sm">{u?.role ?? '—'}</Badge>
+                            <Badge
+                              variant="info"
+                              size="sm"
+                              icon={<MaterialIcons name="workspace-premium" size={14} color="#000000" />}>
+                              {u?.role ?? '—'}
+                            </Badge>
                           </DataTable.Cell>
                           {/* Status cell */}
                           <DataTable.Cell>
-                            <Badge variant={u?.isActive ? 'success' : 'error'} size="sm">
+                            <Badge
+                              variant={u?.isActive ? 'success' : 'error'}
+                              size="sm"
+                              icon={
+                                <MaterialIcons
+                                  name={u?.isActive ? 'verified-user' : 'block'}
+                                  size={14}
+                                  color={u?.isActive ? '#059669' : '#a33c3c'}
+                                />
+                              }>
                               {u?.isActive ? 'Active' : 'Inactive'}
                             </Badge>
                           </DataTable.Cell>

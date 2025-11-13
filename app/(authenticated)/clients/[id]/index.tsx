@@ -4,30 +4,28 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
-import { getInitials, formatDate as formatDateUtil } from '@/utils';
 import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/Badge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
-import { useGetUserById } from '@/tanstack/useUsers';
+import { useGetClient } from '@/tanstack/useClients';
+import { getInitials, formatDate as formatDateUtil } from '@/utils';
 
-export default function UserDetailsScreen() {
+export default function ClientDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id ?? '';
 
-  const { data, isLoading, error, refetch, isRefetching } = useGetUserById(id);
-  const user = data?.data?.user ?? data?.data ?? null;
+  const { data, isLoading, error } = useGetClient(id);
+  const client = data?.data?.client ?? data?.data ?? null;
 
-  const initials = useMemo(() => getInitials(user ? { firstName: user?.firstName, lastName: user?.lastName, email: user?.email } : null), [user]);
-
+  const initials = useMemo(() => getInitials(client ? { firstName: client?.firstName, lastName: client?.lastName, email: client?.email } : null), [client]);
   const formatDate = (value?: string) => formatDateUtil(value);
-
   const errorMessage =
     (error as any)?.response?.data?.message ?? (error as Error)?.message ?? null;
 
-  if (isLoading && !user) {
-    return <Loading fullScreen message="Loading user..." />;
+  if (isLoading && !client) {
+    return <Loading fullScreen message="Loading client..." />;
   }
 
   return (
@@ -36,8 +34,8 @@ export default function UserDetailsScreen() {
         <View className="px-6 py-6 gap-6">
           <View className="flex-row items-center justify-between">
             <View>
-              <ThemedText type="title">User Details</ThemedText>
-              <Text className="text-gray-600 mt-1">User ID: {id}</Text>
+              <ThemedText type="title">Client Details</ThemedText>
+              <Text className="text-gray-600 mt-1">Client ID: {id}</Text>
             </View>
           </View>
 
@@ -46,9 +44,9 @@ export default function UserDetailsScreen() {
           ) : null}
 
           <View className="items-center gap-3">
-            {user?.avatar ? (
+            {client?.avatar ? (
               <Image
-                source={{ uri: user.avatar }}
+                source={{ uri: client.avatar }}
                 resizeMode="cover"
                 className="h-24 w-24 rounded-full border-4 border-white shadow-md"
               />
@@ -61,40 +59,46 @@ export default function UserDetailsScreen() {
             )}
             <View className="items-center gap-2">
               <Text className="font-poppins text-2xl font-semibold text-gray-900 dark:text-gray-100">
-                {user
-                  ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() || user.email
+                {client
+                  ? `${client.firstName ?? ''} ${client.lastName ?? ''}`.trim() || client.email
                   : '—'}
               </Text>
               <View className="flex-row items-center gap-2">
                 <Badge
-                  variant="info"
-                  size="sm"
-                  icon={<MaterialIcons name="workspace-premium" size={14} color="#000000" />}>
-                  {user?.role ?? '—'}
-                </Badge>
-                <Badge
-                  variant={user?.isActive ? 'success' : 'error'}
+                  variant={client?.emailVerified ? 'success' : 'error'}
                   size="sm"
                   icon={
                     <MaterialIcons
-                      name={user?.isActive ? 'verified-user' : 'block'}
+                      name={client?.emailVerified ? 'verified' : 'error-outline'}
                       size={14}
-                      color={user?.isActive ? '#059669' : '#a33c3c'}
+                      color={client?.emailVerified ? '#059669' : '#a33c3c'}
                     />
                   }>
-                  {user?.isActive ? 'Active' : 'Inactive'}
+                  {client?.emailVerified ? 'Verified' : 'Unverified'}
+                </Badge>
+                <Badge
+                  variant={client?.isActive ? 'success' : 'error'}
+                  size="sm"
+                  icon={
+                    <MaterialIcons
+                      name={client?.isActive ? 'verified-user' : 'block'}
+                      size={14}
+                      color={client?.isActive ? '#059669' : '#a33c3c'}
+                    />
+                  }>
+                  {client?.isActive ? 'Active' : 'Inactive'}
                 </Badge>
               </View>
             </View>
           </View>
           <View className="items-center">
             <Pressable
-              onPress={() => router.push(`/(authenticated)/users/${id}/edit`)}
+              onPress={() => router.push(`/(authenticated)/clients/${id}/edit`)}
               className="rounded-xl bg-brand-primary px-6 py-3"
               accessibilityRole="button"
-              accessibilityLabel="Edit user">
+              accessibilityLabel="Edit client">
               <Text className="font-inter text-base font-semibold text-white">
-                Edit User
+                Edit Client
               </Text>
             </Pressable>
           </View>
@@ -105,8 +109,20 @@ export default function UserDetailsScreen() {
                 Contact Information
               </Text>
               <View className="mt-4 gap-3">
-                <InfoRow icon="mail-outline" label="Email" value={user?.email ?? '—'} />
-                <InfoRow icon="call" label="Phone" value={user?.phone ?? 'Not provided'} />
+                <InfoRow icon="mail-outline" label="Email" value={client?.email ?? '—'} />
+                <InfoRow icon="call" label="Phone" value={client?.phone ?? 'Not provided'} />
+                <InfoRow icon="business" label="Company" value={client?.company ?? '—'} />
+              </View>
+            </View>
+
+            <View className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+              <Text className="font-poppins text-lg font-semibold text-gray-900 dark:text-gray-50">
+                Address
+              </Text>
+              <View className="mt-4 gap-3">
+                <InfoRow icon="place" label="Address" value={client?.address ?? '—'} />
+                <InfoRow icon="location-city" label="City" value={client?.city ?? '—'} />
+                <InfoRow icon="public" label="Country" value={client?.country ?? '—'} />
               </View>
             </View>
 
@@ -115,20 +131,48 @@ export default function UserDetailsScreen() {
                 Account Details
               </Text>
               <View className="mt-4 gap-3">
-                <InfoRow icon="workspace-premium" label="Role" value={user?.role ?? '—'} />
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
                     <MaterialIcons name="verified" size={18} color="#9ca3af" />
                     <Text className="font-inter text-sm text-gray-500 dark:text-gray-400">
+                      Verified
+                    </Text>
+                  </View>
+                  <Badge
+                    variant={client?.emailVerified ? 'success' : 'error'}
+                    size="sm"
+                    icon={
+                      <MaterialIcons
+                        name={client?.emailVerified ? 'verified' : 'error-outline'}
+                        size={14}
+                        color={client?.emailVerified ? '#059669' : '#a33c3c'}
+                      />
+                    }>
+                    {client?.emailVerified ? 'Verified' : 'Unverified'}
+                  </Badge>
+                </View>
+                <View className="flex-row items-center justify-between">
+                  <View className="flex-row items-center gap-2">
+                    <MaterialIcons name="shield" size={18} color="#9ca3af" />
+                    <Text className="font-inter text-sm text-gray-500 dark:text-gray-400">
                       Status
                     </Text>
                   </View>
-                  <Badge variant={user?.isActive ? 'success' : 'error'} size="sm">
-                    {user?.isActive ? 'Active' : 'Inactive'}
+                  <Badge
+                    variant={client?.isActive ? 'success' : 'error'}
+                    size="sm"
+                    icon={
+                      <MaterialIcons
+                        name={client?.isActive ? 'verified-user' : 'block'}
+                        size={14}
+                        color={client?.isActive ? '#059669' : '#a33c3c'}
+                      />
+                    }>
+                    {client?.isActive ? 'Active' : 'Inactive'}
                   </Badge>
                 </View>
-                <InfoRow icon="event-note" label="Created" value={formatDate(user?.createdAt)} />
-                <InfoRow icon="update" label="Updated" value={formatDate(user?.updatedAt)} />
+                <InfoRow icon="event-note" label="Created" value={formatDate(client?.createdAt)} />
+                <InfoRow icon="update" label="Updated" value={formatDate(client?.updatedAt)} />
               </View>
             </View>
           </View>
