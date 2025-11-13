@@ -364,8 +364,9 @@ export default function UsersScreen() {
                       const id = u._id || u.id;
                       return (
                         <DataTable.Row key={id}>
+                          {/* User cell */}
                           <DataTable.Cell>
-                            <View className="flex-row items-center gap-3">
+                            <View className="flex-row items-center gap-3 min-w-0">
                               <View className="h-8 w-8 rounded-full overflow-hidden bg-brand-tint items-center justify-center">
                                 {u?.avatar ? (
                                   <Image source={{ uri: u.avatar }} style={{ height: 32, width: 32 }} />
@@ -375,23 +376,31 @@ export default function UsersScreen() {
                                   </Text>
                                 )}
                               </View>
-                              <View>
-                                <Text className="text-sm text-gray-900">
+                              <View className="min-w-0 max-w-[160px] overflow-hidden shrink">
+                                <Text
+                                  className="text-sm text-gray-900"
+                                  numberOfLines={1}
+                                  ellipsizeMode="tail">
                                   {`${u?.firstName ?? ''} ${u?.lastName ?? ''}`.trim() || '—'}
                                 </Text>
                               </View>
                             </View>
                           </DataTable.Cell>
+                          {/* Email cell */}
                           <DataTable.Cell>{u?.email ?? '—'}</DataTable.Cell>
+                          {/* Role cell */}
                           <DataTable.Cell>
                             <Badge variant="info" size="sm">{u?.role ?? '—'}</Badge>
                           </DataTable.Cell>
+                          {/* Status cell */}
                           <DataTable.Cell>
                             <Badge variant={u?.isActive ? 'success' : 'error'} size="sm">
                               {u?.isActive ? 'Active' : 'Inactive'}
                             </Badge>
                           </DataTable.Cell>
+                          {/* Created date cell */}
                           <DataTable.Cell>{formatDate(u?.createdAt)}</DataTable.Cell>
+                          {/* Actions cell */}
                           <DataTable.Cell numeric>
                             <View className="flex-row justify-end gap-2">
                               <Pressable onPress={() => handleView(id)} className="px-2 py-1" accessibilityLabel="View user">
