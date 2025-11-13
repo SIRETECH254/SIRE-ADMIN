@@ -114,6 +114,28 @@ export const useGetUserById = (userId: string) => {
   });
 };
 
+// Update user (admin)
+export const useUpdateUser = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ userId, userData }: { userId: string; userData: any }) => {
+      const response = await userAPI.updateUser(userId, userData);
+      return response.data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['user', variables.userId] });
+      console.log('User updated successfully');
+    },
+    onError: (error: any) => {
+      console.error('Update user error:', error);
+      const errorMessage = error.response?.data?.message || 'Failed to update user';
+      console.error('Error:', errorMessage);
+    },
+  });
+};
+
 // Create admin user (super admin)
 export const useAdminCreateUser = () => {
   const queryClient = useQueryClient();

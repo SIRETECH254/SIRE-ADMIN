@@ -22,6 +22,11 @@
     @apply form-input border-gray-200 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400;
   }
 
+  /* Search input with left icon spacing */
+  .input-search {
+    @apply w-full rounded-xl border border-gray-300 bg-white pl-10 pr-3 py-2 text-sm font-inter text-gray-900 placeholder:text-gray-400 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100;
+  }
+
   .btn {
     @apply flex-row items-center justify-center rounded-xl px-4 py-3;
   }

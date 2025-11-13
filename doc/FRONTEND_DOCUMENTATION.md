@@ -228,11 +228,6 @@ sire-admin/
 │   │   ├── Select.tsx          # Dropdown select component
 │   │   ├── DatePicker.tsx      # Date selection component
 │   │   └── Checkbox.tsx        # Checkbox input component
-│   ├── tables/                  # Table components
-│   │   ├── Table.tsx           # Data table component
-│   │   ├── TableHeader.tsx     # Table header with sorting
-│   │   ├── TableRow.tsx        # Table row component
-│   │   └── Pagination.tsx      # Pagination controls
 │   ├── external-link.tsx        # External link component
 │   ├── haptic-tab.tsx           # Haptic feedback tab button
 │   ├── hello-wave.tsx           # Animated wave component
