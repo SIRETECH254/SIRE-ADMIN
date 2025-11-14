@@ -36,4 +36,26 @@ export function formatDate(value?: string | number | Date | null, locale: string
   }
 }
 
+export function formatCurrency(
+  value?: number | null,
+  currency: string = 'KES',
+  locale: string = 'en-KE',
+  options?: Intl.NumberFormatOptions
+): string {
+  if (value === null || value === undefined || Number.isNaN(value)) {
+    return '—';
+  }
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency,
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
+      ...options,
+    }).format(value);
+  } catch {
+    return `${currency} ${value.toFixed(2)}`;
+  }
+}
+
 
