@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
 import { MultiSelect } from 'react-native-element-dropdown';
+import { DatePickerModal } from 'react-native-paper-dates';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
@@ -55,8 +55,8 @@ export default function CreateProjectScreen() {
   const [teamMemberIds, setTeamMemberIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [startPickerOpen, setStartPickerOpen] = useState(false);
+  const [endPickerOpen, setEndPickerOpen] = useState(false);
   const [progress, setProgress] = useState('0');
   const [notes, setNotes] = useState('');
   const [inlineStatus, setInlineStatus] = useState<InlineStatus>(null);
@@ -280,7 +280,7 @@ export default function CreateProjectScreen() {
             <View className="gap-2">
               <Text className="form-label">Start Date (optional)</Text>
               <Pressable
-                onPress={() => setShowStartDatePicker(true)}
+                onPress={() => setStartPickerOpen(true)}
                 className="input-date flex-row items-center justify-between">
                 <Text className={startDate ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'}>
                   {startDate ? startDate.toLocaleDateString() : 'Select start date'}
@@ -292,7 +292,7 @@ export default function CreateProjectScreen() {
             <View className="gap-2">
               <Text className="form-label">End Date (optional)</Text>
               <Pressable
-                onPress={() => setShowEndDatePicker(true)}
+                onPress={() => setEndPickerOpen(true)}
                 className="input-date flex-row items-center justify-between">
                 <Text className={endDate ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'}>
                   {endDate ? endDate.toLocaleDateString() : 'Select end date'}
@@ -353,99 +353,35 @@ export default function CreateProjectScreen() {
       </ScrollView>
 
       {/* Date Pickers */}
-      {Platform.OS === 'ios' ? (
-        <Modal visible={showStartDatePicker} transparent animationType="slide">
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-white rounded-t-3xl p-4">
-              <View className="flex-row justify-between items-center mb-4">
-                <Pressable onPress={() => setShowStartDatePicker(false)}>
-                  <Text className="text-brand-primary font-semibold">Cancel</Text>
-                </Pressable>
-                <Text className="font-semibold text-lg">Select Start Date</Text>
-                <Pressable
-                  onPress={() => {
-                    setShowStartDatePicker(false);
-                    setInlineStatus(null);
-                  }}>
-                  <Text className="text-brand-primary font-semibold">Done</Text>
-                </Pressable>
-              </View>
-              <DateTimePicker
-                value={startDate || new Date()}
-                mode="date"
-                display="spinner"
-                onChange={(event, date) => {
-                  if (event.type === 'set' && date) {
-                    setStartDate(date);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </Modal>
-      ) : (
-        showStartDatePicker && (
-          <DateTimePicker
-            value={startDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowStartDatePicker(false);
-              if (event.type === 'set' && date) {
-                setStartDate(date);
-                setInlineStatus(null);
-              }
-            }}
-          />
-        )
-      )}
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={startPickerOpen}
+        date={startDate ?? undefined}
+        onDismiss={() => setStartPickerOpen(false)}
+        onConfirm={({ date }) => {
+          setStartPickerOpen(false);
+          if (date) {
+            setStartDate(date);
+            setInlineStatus(null);
+          }
+        }}
+      />
 
-      {Platform.OS === 'ios' ? (
-        <Modal visible={showEndDatePicker} transparent animationType="slide">
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-white rounded-t-3xl p-4">
-              <View className="flex-row justify-between items-center mb-4">
-                <Pressable onPress={() => setShowEndDatePicker(false)}>
-                  <Text className="text-brand-primary font-semibold">Cancel</Text>
-                </Pressable>
-                <Text className="font-semibold text-lg">Select End Date</Text>
-                <Pressable
-                  onPress={() => {
-                    setShowEndDatePicker(false);
-                    setInlineStatus(null);
-                  }}>
-                  <Text className="text-brand-primary font-semibold">Done</Text>
-                </Pressable>
-              </View>
-              <DateTimePicker
-                value={endDate || new Date()}
-                mode="date"
-                display="spinner"
-                onChange={(event, date) => {
-                  if (event.type === 'set' && date) {
-                    setEndDate(date);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </Modal>
-      ) : (
-        showEndDatePicker && (
-          <DateTimePicker
-            value={endDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowEndDatePicker(false);
-              if (event.type === 'set' && date) {
-                setEndDate(date);
-                setInlineStatus(null);
-              }
-            }}
-          />
-        )
-      )}
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={endPickerOpen}
+        date={endDate ?? undefined}
+        onDismiss={() => setEndPickerOpen(false)}
+        onConfirm={({ date }) => {
+          setEndPickerOpen(false);
+          if (date) {
+            setEndDate(date);
+            setInlineStatus(null);
+          }
+        }}
+      />
     </ThemedView>
   );
 }

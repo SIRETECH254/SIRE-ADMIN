@@ -1,8 +1,8 @@
 import React, { useCallback, useState } from 'react';
-import { ActivityIndicator, Modal as RNModal, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import { DatePickerModal } from 'react-native-paper-dates';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
@@ -36,12 +36,12 @@ export default function MilestonesScreen() {
   const [newMilestoneTitle, setNewMilestoneTitle] = useState('');
   const [newMilestoneDescription, setNewMilestoneDescription] = useState('');
   const [newMilestoneDueDate, setNewMilestoneDueDate] = useState<Date | null>(null);
-  const [showNewDueDatePicker, setShowNewDueDatePicker] = useState(false);
+  const [newDuePickerOpen, setNewDuePickerOpen] = useState(false);
   const [editingMilestoneId, setEditingMilestoneId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const [editDescription, setEditDescription] = useState('');
   const [editDueDate, setEditDueDate] = useState<Date | null>(null);
-  const [showEditDueDatePicker, setShowEditDueDatePicker] = useState(false);
+  const [editDuePickerOpen, setEditDuePickerOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const [inlineStatus, setInlineStatus] = useState<InlineStatus>(null);
 
@@ -228,8 +228,8 @@ export default function MilestonesScreen() {
               </View>
               <View className="gap-2">
                 <Text className="form-label">Due Date (optional)</Text>
-                <Pressable
-                  onPress={() => setShowNewDueDatePicker(true)}
+                        <Pressable
+                          onPress={() => setNewDuePickerOpen(true)}
                   className="input-date flex-row items-center justify-between">
                   <Text className={newMilestoneDueDate ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'}>
                     {newMilestoneDueDate ? newMilestoneDueDate.toLocaleDateString() : 'Select due date'}
@@ -301,7 +301,7 @@ export default function MilestonesScreen() {
                         <View className="gap-2">
                           <Text className="form-label">Due Date (optional)</Text>
                           <Pressable
-                            onPress={() => setShowEditDueDatePicker(true)}
+                            onPress={() => setEditDuePickerOpen(true)}
                             className="input-date flex-row items-center justify-between">
                             <Text className={editDueDate ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400'}>
                               {editDueDate ? editDueDate.toLocaleDateString() : 'Select due date'}
@@ -425,99 +425,35 @@ export default function MilestonesScreen() {
       </Modal>
 
       {/* Date Pickers */}
-      {Platform.OS === 'ios' ? (
-        <RNModal visible={showNewDueDatePicker} transparent animationType="slide">
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-white rounded-t-3xl p-4">
-              <View className="flex-row justify-between items-center mb-4">
-                <Pressable onPress={() => setShowNewDueDatePicker(false)}>
-                  <Text className="text-brand-primary font-semibold">Cancel</Text>
-                </Pressable>
-                <Text className="font-semibold text-lg">Select Due Date</Text>
-                <Pressable
-                  onPress={() => {
-                    setShowNewDueDatePicker(false);
-                    setInlineStatus(null);
-                  }}>
-                  <Text className="text-brand-primary font-semibold">Done</Text>
-                </Pressable>
-              </View>
-              <DateTimePicker
-                value={newMilestoneDueDate || new Date()}
-                mode="date"
-                display="spinner"
-                onChange={(event, date) => {
-                  if (event.type === 'set' && date) {
-                    setNewMilestoneDueDate(date);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </RNModal>
-      ) : (
-        showNewDueDatePicker && (
-          <DateTimePicker
-            value={newMilestoneDueDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowNewDueDatePicker(false);
-              if (event.type === 'set' && date) {
-                setNewMilestoneDueDate(date);
-                setInlineStatus(null);
-              }
-            }}
-          />
-        )
-      )}
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={newDuePickerOpen}
+        date={newMilestoneDueDate ?? undefined}
+        onDismiss={() => setNewDuePickerOpen(false)}
+        onConfirm={({ date }) => {
+          setNewDuePickerOpen(false);
+          if (date) {
+            setNewMilestoneDueDate(date);
+            setInlineStatus(null);
+          }
+        }}
+      />
 
-      {Platform.OS === 'ios' ? (
-        <RNModal visible={showEditDueDatePicker} transparent animationType="slide">
-          <View className="flex-1 justify-end bg-black/50">
-            <View className="bg-white rounded-t-3xl p-4">
-              <View className="flex-row justify-between items-center mb-4">
-                <Pressable onPress={() => setShowEditDueDatePicker(false)}>
-                  <Text className="text-brand-primary font-semibold">Cancel</Text>
-                </Pressable>
-                <Text className="font-semibold text-lg">Select Due Date</Text>
-                <Pressable
-                  onPress={() => {
-                    setShowEditDueDatePicker(false);
-                    setInlineStatus(null);
-                  }}>
-                  <Text className="text-brand-primary font-semibold">Done</Text>
-                </Pressable>
-              </View>
-              <DateTimePicker
-                value={editDueDate || new Date()}
-                mode="date"
-                display="spinner"
-                onChange={(event, date) => {
-                  if (event.type === 'set' && date) {
-                    setEditDueDate(date);
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </RNModal>
-      ) : (
-        showEditDueDatePicker && (
-          <DateTimePicker
-            value={editDueDate || new Date()}
-            mode="date"
-            display="default"
-            onChange={(event, date) => {
-              setShowEditDueDatePicker(false);
-              if (event.type === 'set' && date) {
-                setEditDueDate(date);
-                setInlineStatus(null);
-              }
-            }}
-          />
-        )
-      )}
+      <DatePickerModal
+        locale="en"
+        mode="single"
+        visible={editDuePickerOpen}
+        date={editDueDate ?? undefined}
+        onDismiss={() => setEditDuePickerOpen(false)}
+        onConfirm={({ date }) => {
+          setEditDuePickerOpen(false);
+          if (date) {
+            setEditDueDate(date);
+            setInlineStatus(null);
+          }
+        }}
+      />
     </ThemedView>
   );
 }
