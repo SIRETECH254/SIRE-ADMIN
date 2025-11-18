@@ -19,7 +19,7 @@
 The Payments screens reuse shared layout, themed helpers, table components and TanStack Query hooks:
 
 ```tsx
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -32,6 +32,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Picker } from '@react-native-picker/picker';
 import { DataTable } from 'react-native-paper';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import io, { Socket } from 'socket.io-client';
 
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
@@ -41,6 +42,7 @@ import Pagination from '@/components/table/Pagination';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { formatCurrency, formatDate } from '@/utils';
+import { API_BASE_URL } from '@/api/config';
 import {
   useGetPayments,
   useGetPayment,
@@ -49,7 +51,6 @@ import {
   useDeletePayment,
   useInitiatePayment,
   useQueryMpesaStatus,
-  useGetPaymentStatus,
 } from '@/tanstack/usePayments';
 import { useGetInvoices } from '@/tanstack/useInvoices';
 import { useGetClients } from '@/tanstack/useClients';
@@ -73,12 +74,16 @@ import { useGetClients } from '@/tanstack/useClients';
   - `useUpdatePayment()` for update
   - `useDeletePayment()` for delete
   - `useInitiatePayment()` for initiating M-Pesa/Paystack payments
-  - `useQueryMpesaStatus(checkoutRequestId)` for M-Pesa status polling
-  - `useGetPaymentStatus(paymentId)` for unified status checking
-- WebSocket:
-  - Real-time M-Pesa payment status updates via WebSocket connection
-  - Connection established on status page mount
-  - 45-second timeout, then fallback to API polling
+  - `useQueryMpesaStatus(checkoutRequestId)` for M-Pesa status polling (fallback only)
+- Socket.IO:
+  - Real-time payment status updates via Socket.IO connection
+  - Connection established on status page mount for both M-Pesa and Paystack
+  - Connection options: `transports: ['websocket']`, `forceNew: true`, `timeout: 20000`, `reconnection: true`, `reconnectionAttempts: 5`, `reconnectionDelay: 1000`
+  - Subscription via `subscribe-to-payment` event with payment ID
+  - M-Pesa events: `callback.received`, `payment.updated`
+  - Paystack events: `payment.updated`
+  - 60-second timeout for M-Pesa, then fallback to API polling via `useQueryMpesaStatus`
+  - API refetch triggered on socket connection to ensure latest payment data
 
 ### Hooks & State
 - List screen:
@@ -94,9 +99,10 @@ import { useGetClients } from '@/tanstack/useClients';
   - Supporting queries: `useGetInvoices()` for invoice selection
 - Status screen:
   - Query params: `paymentId` (primary), `checkoutId` (optional, for M-Pesa)
-  - Queries: `useGetPayment(paymentId)`, `useQueryMpesaStatus(checkoutId)` (fallback)
-  - WebSocket: Connection state, message handler, timeout management
-  - Local: `paymentStatus`, `wsConnected`, `wsError`, `pollingActive`
+  - Queries: `useGetPayment(paymentId)` with `refetch`, `useQueryMpesaStatus(checkoutId)` (fallback only, enabled: false)
+  - Socket.IO: Connection state, event listeners, timeout management, refs for socket and timers
+  - Local state: `socketConnected`, `socketError`, `socketStatus`, `isFallbackActive`
+  - Refs: `socketRef` (Socket instance), `timeoutRef` (fallback timeout), `pollingActiveRef`, `pollingIntervalRef`
 
 ### Payment List UI
 - RN-compatible table using `react-native-paper` DataTable:
@@ -139,19 +145,29 @@ import { useGetClients } from '@/tanstack/useClients';
 - Payment method badge (M-Pesa or Paystack)
 - Current status display with loading indicator
 - Amount and invoice reference
-- Status timeline/progress indicator
+- Connection status display showing Socket.IO connection state
 - M-Pesa flow:
-  - WebSocket connection established on mount
-  - Listen for payment status updates for 45 seconds
-  - If websocket fails or no response: fallback to API polling using `useQueryMpesaStatus(checkoutId)`
-  - Polling interval: 3-5 seconds
+  - Socket.IO connection established on mount
+  - Subscribe to payment updates via `subscribe-to-payment` event
+  - Listen for `callback.received` event (M-Pesa callback from Safaricom)
+  - Listen for `payment.updated` event (database updates)
+  - Handle M-Pesa result codes (0 = success, 1 = insufficient balance, 1032 = cancelled, etc.)
+  - If no response after 60 seconds: fallback to API polling using `useQueryMpesaStatus(checkoutId)`
+  - Fallback queries Safaricom directly for payment status
 - Paystack flow:
-  - Use `useGetPayment(paymentId)` to poll status
-  - Polling interval: 3-5 seconds
+  - Socket.IO connection established on mount
+  - Subscribe to payment updates via `subscribe-to-payment` event
+  - Listen for `payment.updated` event (database updates)
+  - Handle Paystack status values (`completed`, `PAID`, `failed`, `FAILED`)
+- Socket.IO connection features:
+  - Automatic reconnection (up to 5 attempts with 1 second delay)
+  - Connection error handling with user feedback
+  - API refetch on connection to ensure latest payment data
+  - Clean disconnection on component unmount
 - Action buttons:
   - View Details (navigate to payment detail page)
   - Retry (if failed, re-initiate payment)
-- Auto-navigation: When payment status becomes "completed", navigate to payment detail page
+- Status priority: Socket.IO status takes precedence over API status when available
 
 ### Filters, Search & Pagination
 - Status filter options: `all | pending | completed | failed`
@@ -188,7 +204,7 @@ import { useGetClients } from '@/tanstack/useClients';
   - Empty: full-width "No payments found" row with quick CTA; header persists
 - Details: `Loading` for fetch; `Alert` for errors
 - Initiate: disable buttons while submitting; inline success/error; safe retries
-- Status: Loading indicator during websocket connection and polling; error alerts; connection status display
+- Status: Loading indicator during Socket.IO connection; error alerts; connection status display showing "Socket.IO Connected/Disconnected"; fallback status indicator when API polling is active
 
 ### Wireframes
 
@@ -242,10 +258,98 @@ Amount: KES 10,000
 Invoice: INV-001
 
 Status: Processing...
-[Connecting via WebSocket...]
+
+Connection Status:
+Socket.IO: [Connected]
+API Polling: [Active] (if fallback)
 
 [ View Details ] [ Retry ]
 ```
+
+### Socket.IO Implementation Details
+
+#### Connection Setup
+- Uses `socket.io-client` library
+- Connects to `API_BASE_URL` from config
+- Connection options:
+  - `transports: ['websocket']` - Force WebSocket transport
+  - `forceNew: true` - Create new connection each time
+  - `timeout: 20000` - 20 second connection timeout
+  - `reconnection: true` - Enable automatic reconnection
+  - `reconnectionAttempts: 5` - Maximum reconnection attempts
+  - `reconnectionDelay: 1000` - 1 second delay between attempts
+
+#### Event Flow
+
+**M-Pesa Events:**
+1. `connect` - Socket.IO connection established
+   - Emits `subscribe-to-payment` with payment ID
+   - Should call `refetch()` from `useGetPayment` to get latest payment data via API (ensures API call is visible in network tab)
+   - Sets `socketConnected` to `true` and clears `socketError`
+2. `callback.received` - M-Pesa callback from Safaricom
+   - Payload contains `CODE` (result code) and `message`
+   - Handled by `handleMpesaResultCode()` function
+   - Clears all timers when final status is received
+3. `payment.updated` - Database payment update
+   - Payload contains `paymentId` and `status`
+   - Updates local `socketStatus` state if payment ID matches
+   - Clears timers if status is `completed`, `failed`, or `cancelled`
+4. `disconnect` - Socket.IO disconnected
+   - Sets `socketConnected` to `false`
+5. `connect_error` - Connection error occurred
+   - Sets `socketError` to error message
+   - Sets `socketConnected` to `false`
+
+**Paystack Events:**
+1. `connect` - Socket.IO connection established
+   - Emits `subscribe-to-payment` with payment ID
+   - Should call `refetch()` from `useGetPayment` to get latest payment data via API (ensures API call is visible in network tab)
+   - Sets `socketConnected` to `true` and clears `socketError`
+2. `payment.updated` - Database payment update
+   - Payload contains `paymentId` and `status`
+   - Handles status values: `completed`, `PAID`, `failed`, `FAILED`
+   - Clears timers when payment reaches final state
+3. `disconnect` - Socket.IO disconnected
+   - Sets `socketConnected` to `false`
+4. `connect_error` - Connection error occurred
+   - Sets `socketError` to error message
+   - Sets `socketConnected` to `false`
+
+#### M-Pesa Result Codes
+- `0` - Success (payment completed)
+- `1` - Insufficient M-Pesa balance
+- `1032` - Payment cancelled by user
+- `1037` - Payment timeout (could not reach phone)
+- `2001` - Wrong PIN entered
+- `1001` - Unable to complete transaction
+- `1019` - Transaction expired
+- `1025` - Invalid phone number
+- `1026` - System error occurred
+- `1036` - Internal error occurred
+- `1050` - Too many payment attempts
+- `9999` - Keep waiting (processing)
+
+#### Fallback Mechanism
+- M-Pesa only: After 60 seconds (`FALLBACK_TIMEOUT`), if no Socket.IO update received
+- Queries Safaricom directly via `useQueryMpesaStatus(checkoutId)`
+- Parses result code and description from response
+- Updates payment status based on result code
+- Clears all timers and disconnects socket after fallback completes
+
+#### Cleanup
+- `clearPaymentTimers()` function:
+  - Clears timeout refs
+  - Clears polling interval refs
+  - Disconnects Socket.IO connection
+  - Called on component unmount and when payment completes/fails
+
+#### Dependencies
+- `startTracking` useCallback dependencies:
+  - `paymentId`, `isMpesa`, `checkoutId`
+  - `clearPaymentTimers`, `handleMpesaResultCode`, `refetchMpesaStatus`
+  - Note: `refetch` from `useGetPayment` should be included if used in connect handler
+- `useEffect` dependencies for initialization:
+  - `paymentId`, `isMpesa`, `checkoutId`, `startTracking`, `clearPaymentTimers`
 
 ### Future Enhancements
 - Bulk payment processing
@@ -256,4 +360,6 @@ Status: Processing...
 - Recurring payment setup
 - Payment reminders
 - Multi-currency support
+- Socket.IO room-based subscriptions for better scalability
+- Payment status history timeline
 

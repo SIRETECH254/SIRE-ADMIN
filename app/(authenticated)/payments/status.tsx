@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import io, { Socket } from 'socket.io-client';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
@@ -42,11 +43,11 @@ export default function PaymentStatusScreen() {
     enabled: false, // Only fetch when manually triggered after 60 seconds
   });
 
-  const [wsConnected, setWsConnected] = useState(false);
-  const [wsError, setWsError] = useState<string | null>(null);
-  const [wsStatus, setWsStatus] = useState<PaymentStatus | null>(null);
+  const [socketConnected, setSocketConnected] = useState(false);
+  const [socketError, setSocketError] = useState<string | null>(null);
+  const [socketStatus, setSocketStatus] = useState<PaymentStatus | null>(null);
   const [isFallbackActive, setIsFallbackActive] = useState(false);
-  const wsRef = useRef<WebSocket | null>(null);
+  const socketRef = useRef<Socket | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollingActiveRef = useRef(false);
   const pollingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -56,11 +57,11 @@ export default function PaymentStatusScreen() {
     return root?.data?.payment ?? root?.payment ?? root?.data ?? root;
   }, [data]);
 
-  // Use websocket status if available, otherwise use payment status
+  // Use socket status if available, otherwise use payment status
   const currentStatus = useMemo(() => {
-    if (wsStatus) return wsStatus;
+    if (socketStatus) return socketStatus;
     return (payment?.status ?? 'pending').toLowerCase() as PaymentStatus;
-  }, [payment?.status, wsStatus]);
+  }, [payment?.status, socketStatus]);
 
   const statusConfig = statusVariantMap[currentStatus] ?? statusVariantMap.pending;
   const isMpesa = payment?.paymentMethod?.toLowerCase() === 'mpesa' || !!checkoutId;
@@ -77,17 +78,17 @@ export default function PaymentStatusScreen() {
       clearInterval(pollingIntervalRef.current);
       pollingIntervalRef.current = null;
     }
-    if (wsRef.current) {
+    if (socketRef.current) {
       try {
-        wsRef.current.close();
+        socketRef.current.disconnect();
       } catch (err) {
-        console.error('Error closing WebSocket:', err);
+        console.error('Error disconnecting Socket.IO:', err);
       }
-      wsRef.current = null;
+      socketRef.current = null;
     }
   }, []);
 
-  // Handle M-Pesa result codes (similar to PaymentStatus.jsx)
+  // Handle M-Pesa result codes
   const handleMpesaResultCode = useCallback(
     (resultCode: number, resultMessage: string) => {
       clearPaymentTimers();
@@ -95,136 +96,169 @@ export default function PaymentStatusScreen() {
       switch (resultCode) {
         case 0: {
           // SUCCESS
-          setWsStatus('completed');
+          setSocketStatus('completed');
           break;
         }
         case 1: {
-          setWsStatus('failed');
-          setWsError('Insufficient M-Pesa balance');
+          setSocketStatus('failed');
+          setSocketError('Insufficient M-Pesa balance');
           break;
         }
         case 1032: {
-          setWsStatus('cancelled');
-          setWsError('Payment cancelled by user');
+          setSocketStatus('cancelled');
+          setSocketError('Payment cancelled by user');
           break;
         }
         case 1037: {
-          setWsStatus('failed');
-          setWsError('Payment timeout - could not reach your phone');
+          setSocketStatus('failed');
+          setSocketError('Payment timeout - could not reach your phone');
           break;
         }
         case 2001: {
-          setWsStatus('failed');
-          setWsError('Wrong PIN entered');
+          setSocketStatus('failed');
+          setSocketError('Wrong PIN entered');
           break;
         }
         case 1001: {
-          setWsStatus('failed');
-          setWsError('Unable to complete transaction');
+          setSocketStatus('failed');
+          setSocketError('Unable to complete transaction');
           break;
         }
         case 1019: {
-          setWsStatus('failed');
-          setWsError('Transaction expired');
+          setSocketStatus('failed');
+          setSocketError('Transaction expired');
           break;
         }
         case 1025: {
-          setWsStatus('failed');
-          setWsError('Invalid phone number');
+          setSocketStatus('failed');
+          setSocketError('Invalid phone number');
           break;
         }
         case 1026: {
-          setWsStatus('failed');
-          setWsError('System error occurred');
+          setSocketStatus('failed');
+          setSocketError('System error occurred');
           break;
         }
         case 1036: {
-          setWsStatus('failed');
-          setWsError('Internal error occurred');
+          setSocketStatus('failed');
+          setSocketError('Internal error occurred');
           break;
         }
         case 1050: {
-          setWsStatus('failed');
-          setWsError('Too many payment attempts');
+          setSocketStatus('failed');
+          setSocketError('Too many payment attempts');
           break;
         }
         case 9999: {
           // Keep waiting - don't clear timers
-          setWsStatus('processing');
+          setSocketStatus('processing');
           break;
         }
         default: {
-          setWsStatus('failed');
-          setWsError(resultMessage || `Transaction failed with code ${resultCode}`);
+          setSocketStatus('failed');
+          setSocketError(resultMessage || `Transaction failed with code ${resultCode}`);
           break;
         }
       }
     },
-    [clearPaymentTimers, paymentId, router]
+    [clearPaymentTimers]
   );
 
-  // Start payment tracking function (similar to PaymentStatus.jsx)
+  // Start payment tracking function using Socket.IO
   const startTracking = useCallback(
     (trackingPaymentId: string = paymentId, trackingMethod: string = isMpesa ? 'mpesa' : 'paystack') => {
       clearPaymentTimers();
 
-      // Only connect WebSocket for M-Pesa and Paystack
+      // Only connect Socket.IO for M-Pesa and Paystack
       const shouldConnectSocket = ['mpesa', 'paystack'].includes(trackingMethod);
       if (!shouldConnectSocket) {
         console.log(`Skipping socket connection for method: ${trackingMethod}`);
         return;
       }
 
-      // WebSocket connection for real-time updates
-      if (isMpesa && checkoutId) {
-        try {
-          const wsUrl = API_BASE_URL.replace(/^http/, 'ws') + `/ws/payments/${checkoutId}`;
-          const ws = new WebSocket(wsUrl);
-          wsRef.current = ws;
+      // Socket.IO connection for real-time updates
+      try {
+        const baseUrl = API_BASE_URL;
+        socketRef.current = io(baseUrl, {
+          transports: ['websocket'],
+          forceNew: true,
+          timeout: 20000,
+          reconnection: true,
+          reconnectionAttempts: 5,
+          reconnectionDelay: 1000,
+        });
 
-          ws.onopen = () => {
-            console.log('WebSocket connected, subscribing to payment:', trackingPaymentId);
-            setWsConnected(true);
-            setWsError(null);
-            pollingActiveRef.current = false;
-          };
+        socketRef.current.on('connect', () => {
+          console.log('Socket.IO connected, subscribing to payment:', trackingPaymentId);
+          setSocketConnected(true);
+          setSocketError(null);
+          pollingActiveRef.current = false;
+          
+          // Subscribe to payment updates
+          socketRef.current?.emit('subscribe-to-payment', String(trackingPaymentId));
+        });
 
-          ws.onmessage = (event) => {
-            try {
-              const message = JSON.parse(event.data);
+        socketRef.current.on('disconnect', () => {
+          console.log('Socket.IO disconnected');
+          setSocketConnected(false);
+        });
+
+        socketRef.current.on('connect_error', (err) => {
+          console.error('Socket.IO connection error:', err);
+          setSocketError('Socket.IO connection error');
+          setSocketConnected(false);
+        });
+
+        // =========================
+        //      M-PESA LISTENERS
+        // =========================
+        if (trackingMethod === 'mpesa') {
+          socketRef.current.on('callback.received', (payload: any) => {
+            console.log('M-Pesa callback received:', payload);
+
+            const resultCode = payload.CODE;
+            const resultMessage = payload.message || 'Payment processing completed';
+            handleMpesaResultCode(resultCode, resultMessage);
+          });
+
+          socketRef.current.on('payment.updated', (payload: any) => {
+            if (!payload || String(payload.paymentId) !== String(trackingPaymentId)) return;
+            console.log('Database payment update:', payload);
+            
+            if (payload.status) {
+              const status = payload.status.toLowerCase() as PaymentStatus;
+              setSocketStatus(status);
               
-              // Handle M-Pesa callback.received event
-              if (message.CODE !== undefined) {
-                const resultCode = message.CODE;
-                const resultMessage = message.message || 'Payment processing completed';
-                handleMpesaResultCode(resultCode, resultMessage);
-              } else if (message.status) {
-                // Handle payment.updated event
-                const status = message.status.toLowerCase() as PaymentStatus;
-                setWsStatus(status);
-                
-                if (status === 'completed' || status === 'failed' || status === 'cancelled') {
-                  clearPaymentTimers();
-                }
+              if (status === 'completed' || status === 'failed' || status === 'cancelled') {
+                clearPaymentTimers();
               }
-            } catch (err) {
-              console.error('Error parsing websocket message:', err);
             }
-          };
-
-          ws.onerror = (error) => {
-            console.error('WebSocket error:', error);
-            setWsError('WebSocket connection error');
-            setWsConnected(false);
-          };
-
-          ws.onclose = () => {
-            setWsConnected(false);
-          };
-        } catch (err) {
-          console.error('Error creating WebSocket:', err);
-          setWsError('Failed to connect to WebSocket');
+          });
         }
+
+        // =========================
+        //      PAYSTACK LISTENERS
+        // =========================
+        if (trackingMethod === 'paystack') {
+          socketRef.current.on('payment.updated', (payload: any) => {
+            if (!payload || String(payload.paymentId) !== String(trackingPaymentId)) return;
+
+            if (payload.status === 'completed' || payload.status === 'PAID') {
+              clearPaymentTimers();
+              setSocketStatus('completed');
+            } else if (payload.status === 'failed' || payload.status === 'FAILED') {
+              clearPaymentTimers();
+              setSocketStatus('failed');
+              setSocketError(payload.message || 'Card payment failed');
+            } else {
+              const status = payload.status?.toLowerCase() as PaymentStatus;
+              setSocketStatus(status || 'processing');
+            }
+          });
+        }
+      } catch (err) {
+        console.error('Error creating Socket.IO connection:', err);
+        setSocketError('Failed to connect to Socket.IO');
       }
 
       // Fallback: Query M-Pesa status after 60 seconds (M-PESA ONLY)
@@ -246,23 +280,19 @@ export default function PaymentStatusScreen() {
             handleMpesaResultCode(resultCode, resultDesc);
           } catch (error) {
             console.error('Fallback query error:', error);
-            setWsStatus('failed');
-            setWsError('Could not verify payment status. You can retry the payment.');
+            setSocketStatus('failed');
+            setSocketError('Could not verify payment status. You can retry the payment.');
           } finally {
             setIsFallbackActive(false);
             clearPaymentTimers();
           }
         }, FALLBACK_TIMEOUT);
       }
-
     },
     [
       paymentId,
       isMpesa,
       checkoutId,
-      isCompleted,
-      wsError,
-      router,
       clearPaymentTimers,
       handleMpesaResultCode,
       refetchMpesaStatus,
@@ -392,9 +422,9 @@ export default function PaymentStatusScreen() {
                     ? 'Your payment has been successfully processed.'
                     : isFailed
                     ? 'The payment could not be completed. Please try again.'
-                    : isMpesa && wsConnected
+                    : isMpesa && socketConnected
                     ? 'Waiting for payment confirmation via M-Pesa...'
-                    : isMpesa && !wsConnected && !pollingActiveRef.current
+                    : isMpesa && !socketConnected && !pollingActiveRef.current
                     ? 'Connecting to payment gateway...'
                     : 'Checking payment status...'}
                 </Text>
@@ -436,18 +466,18 @@ export default function PaymentStatusScreen() {
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
                     <MaterialIcons
-                      name={wsConnected ? 'wifi' : 'wifi-off'}
+                      name={socketConnected ? 'wifi' : 'wifi-off'}
                       size={18}
-                      color={wsConnected ? '#059669' : '#9ca3af'}
+                      color={socketConnected ? '#059669' : '#9ca3af'}
                     />
                     <Text className="font-inter text-sm text-gray-600 dark:text-gray-400">
-                      WebSocket
+                      Socket.IO
                     </Text>
                   </View>
                   <Badge
-                    variant={wsConnected ? 'success' : 'default'}
+                    variant={socketConnected ? 'success' : 'default'}
                     size="sm">
-                    {wsConnected ? 'Connected' : 'Disconnected'}
+                    {socketConnected ? 'Connected' : 'Disconnected'}
                   </Badge>
                 </View>
                 {(pollingActiveRef.current || isFallbackActive) && (
@@ -463,8 +493,8 @@ export default function PaymentStatusScreen() {
                     </Badge>
                   </View>
                 )}
-                {wsError && (
-                  <Alert variant="error" message={wsError} className="w-full" />
+                {socketError && (
+                  <Alert variant="error" message={socketError} className="w-full" />
                 )}
               </View>
             </View>
