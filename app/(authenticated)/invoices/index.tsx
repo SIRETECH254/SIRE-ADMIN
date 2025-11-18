@@ -319,8 +319,13 @@ export default function InvoicesScreen() {
                       const statusValue = (invoice.status ?? 'draft').toLowerCase();
                       const statusConfig = statusVariantMap[statusValue] ?? statusVariantMap.draft;
                       const totalAmount = invoice.totalAmount ?? invoice.total ?? 0;
+                      const paidAmount = invoice.paidAmount ?? 0;
                       const dueDate = invoice.dueDate ?? invoice.paymentDueDate;
                       const createdAt = invoice.createdAt ?? invoice.created_on;
+                      const isPaid = statusValue === 'paid';
+                      const isCancelled = statusValue === 'cancelled';
+                      const canPayInvoice = !isPaid && !isCancelled;
+                      const projectId = invoice.project?._id ?? invoice.projectId;
                       return (
                         <DataTable.Row key={id}>
                           <DataTable.Cell>
@@ -369,6 +374,19 @@ export default function InvoicesScreen() {
                                 accessibilityLabel="Edit invoice">
                                 <MaterialIcons name="edit" size={18} color="#7b1c1c" />
                               </Pressable>
+                              {canPayInvoice && (
+                                <Pressable
+                                  onPress={() => {
+                                    const url = projectId
+                                      ? `/(authenticated)/payments/initiate?invoiceId=${id}&projectId=${projectId}` as any
+                                      : `/(authenticated)/payments/initiate?invoiceId=${id}` as any;
+                                    router.push(url);
+                                  }}
+                                  className="px-2 py-1"
+                                  accessibilityLabel="Pay invoice">
+                                  <MaterialIcons name="payment" size={18} color="#059669" />
+                                </Pressable>
+                              )}
                             </View>
                           </DataTable.Cell>
                         </DataTable.Row>

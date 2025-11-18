@@ -212,7 +212,13 @@ export default function InvoiceDetailScreen() {
               )}
             </Pressable>
             <Pressable
-              onPress={() => null}
+              onPress={() => {
+                const projectId = invoice?.project?._id ?? invoice?.projectId;
+                const url = projectId
+                  ? `/(authenticated)/payments/initiate?invoiceId=${invoiceId}&projectId=${projectId}` as any
+                  : `/(authenticated)/payments/initiate?invoiceId=${invoiceId}` as any;
+                router.push(url);
+              }}
               className="btn btn-primary"
               disabled={!canPay}>
               <Text className="btn-text btn-text-primary">Pay</Text>
