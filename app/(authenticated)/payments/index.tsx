@@ -157,108 +157,109 @@ export default function PaymentsScreen() {
 
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-gray-950">
-      <View className="px-4 py-4">
-        <View className="mb-4 flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <View>
-            <ThemedText type="title">Payments</ThemedText>
-            <Text className="text-gray-600 mt-1">
-              Monitor payment transactions and status.
-            </Text>
+      <ScrollView className="flex-1" nestedScrollEnabled={true} contentContainerStyle={{ paddingBottom: 24 }}>
+        <View className="px-4 py-4">
+          <View className="mb-4 flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <View>
+              <ThemedText type="title">Payments</ThemedText>
+              <Text className="text-gray-600 mt-1">
+                Monitor payment transactions and status.
+              </Text>
+            </View>
+            <Link href="/(authenticated)/payments/initiate" className="btn btn-primary self-start">
+              <Text className="btn-text btn-text-primary">Initiate Payment</Text>
+            </Link>
           </View>
-          <Link href="/(authenticated)/payments/initiate" className="btn btn-primary self-start">
-            <Text className="btn-text btn-text-primary">Initiate Payment</Text>
-          </Link>
-        </View>
 
-        <View className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <View className="flex-1">
-            <View className="relative">
-              <MaterialIcons
-                name="search"
-                size={18}
-                color="#9ca3af"
-                style={{ position: 'absolute', left: 12, top: 14 }}
-              />
-              <TextInput
-                value={searchTerm}
-                onChangeText={setSearchTerm}
-                placeholder="Search payments…"
-                className="input-search pr-9"
-              />
-              {searchTerm ? (
-                <Pressable
-                  onPress={clearSearch}
-                  className="absolute right-2 top-2.5"
-                  accessibilityLabel="Clear search">
-                  <MaterialIcons name="close" size={18} color="#9ca3af" />
+          <View className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <View className="flex-1">
+              <View className="relative">
+                <MaterialIcons
+                  name="search"
+                  size={18}
+                  color="#9ca3af"
+                  style={{ position: 'absolute', left: 12, top: 14 }}
+                />
+                <TextInput
+                  value={searchTerm}
+                  onChangeText={setSearchTerm}
+                  placeholder="Search payments…"
+                  className="input-search pr-9"
+                />
+                {searchTerm ? (
+                  <Pressable
+                    onPress={clearSearch}
+                    className="absolute right-2 top-2.5"
+                    accessibilityLabel="Clear search">
+                    <MaterialIcons name="close" size={18} color="#9ca3af" />
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+            <View className="flex-row gap-2 flex-wrap">
+              <View className="input-select">
+                <View className="flex-row items-center">
+                  <MaterialIcons name="filter-alt" size={18} color="#9ca3af" />
+                  <Picker
+                    selectedValue={filterStatus}
+                    onValueChange={(v: StatusFilter) => {
+                      setFilterStatus(v);
+                      setCurrentPage(1);
+                    }}
+                    style={{ flex: 1, height: 40 }}>
+                    <Picker.Item label="Status: All" value="all" />
+                    <Picker.Item label="Pending" value="pending" />
+                    <Picker.Item label="Completed" value="completed" />
+                    <Picker.Item label="Failed" value="failed" />
+                  </Picker>
+                </View>
+              </View>
+              <View className="input-select">
+                <View className="flex-row items-center">
+                  <MaterialIcons name="payment" size={18} color="#9ca3af" />
+                  <Picker
+                    selectedValue={filterMethod}
+                    onValueChange={(v: MethodFilter) => {
+                      setFilterMethod(v);
+                      setCurrentPage(1);
+                    }}
+                    style={{ flex: 1, height: 40 }}>
+                    <Picker.Item label="Method: All" value="all" />
+                    <Picker.Item label="M-Pesa" value="mpesa" />
+                    <Picker.Item label="Paystack" value="paystack" />
+                  </Picker>
+                </View>
+              </View>
+              <View className="input-select">
+                <View className="flex-row items-center">
+                  <MaterialIcons name="list" size={18} color="#9ca3af" />
+                  <Picker
+                    selectedValue={itemsPerPage}
+                    onValueChange={(v: any) => {
+                      setItemsPerPage(Number(v));
+                      setCurrentPage(1);
+                    }}
+                    style={{ flex: 1, height: 40 }}>
+                    <Picker.Item label="Rows: 10" value={10} />
+                    <Picker.Item label="Rows: 20" value={20} />
+                    <Picker.Item label="Rows: 50" value={50} />
+                  </Picker>
+                </View>
+              </View>
+              {(filterStatus !== 'all' || filterMethod !== 'all') ? (
+                <Pressable onPress={clearFilters} className="px-3 py-2 rounded-lg border border-gray-300 bg-white">
+                  <Text className="text-xs text-gray-700">Clear</Text>
                 </Pressable>
               ) : null}
             </View>
           </View>
-          <View className="flex-row gap-2 flex-wrap">
-            <View className="input-select">
-              <View className="flex-row items-center">
-                <MaterialIcons name="filter-alt" size={18} color="#9ca3af" />
-                <Picker
-                  selectedValue={filterStatus}
-                  onValueChange={(v: StatusFilter) => {
-                    setFilterStatus(v);
-                    setCurrentPage(1);
-                  }}
-                  style={{ flex: 1, height: 40 }}>
-                  <Picker.Item label="Status: All" value="all" />
-                  <Picker.Item label="Pending" value="pending" />
-                  <Picker.Item label="Completed" value="completed" />
-                  <Picker.Item label="Failed" value="failed" />
-                </Picker>
-              </View>
-            </View>
-            <View className="input-select">
-              <View className="flex-row items-center">
-                <MaterialIcons name="payment" size={18} color="#9ca3af" />
-                <Picker
-                  selectedValue={filterMethod}
-                  onValueChange={(v: MethodFilter) => {
-                    setFilterMethod(v);
-                    setCurrentPage(1);
-                  }}
-                  style={{ flex: 1, height: 40 }}>
-                  <Picker.Item label="Method: All" value="all" />
-                  <Picker.Item label="M-Pesa" value="mpesa" />
-                  <Picker.Item label="Paystack" value="paystack" />
-                </Picker>
-              </View>
-            </View>
-            <View className="input-select">
-              <View className="flex-row items-center">
-                <MaterialIcons name="list" size={18} color="#9ca3af" />
-                <Picker
-                  selectedValue={itemsPerPage}
-                  onValueChange={(v: any) => {
-                    setItemsPerPage(Number(v));
-                    setCurrentPage(1);
-                  }}
-                  style={{ flex: 1, height: 40 }}>
-                  <Picker.Item label="Rows: 10" value={10} />
-                  <Picker.Item label="Rows: 20" value={20} />
-                  <Picker.Item label="Rows: 50" value={50} />
-                </Picker>
-              </View>
-            </View>
-            {(filterStatus !== 'all' || filterMethod !== 'all') ? (
-              <Pressable onPress={clearFilters} className="px-3 py-2 rounded-lg border border-gray-300 bg-white">
-                <Text className="text-xs text-gray-700">Clear</Text>
-              </Pressable>
-            ) : null}
-          </View>
         </View>
-      </View>
 
-      <View className="px-4 pb-6">
-        <View className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          <ScrollView horizontal>
-            <View className="min-w-[800px]">
-              <DataTable>
+        <View className="px-4 pb-6">
+          <View className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <ScrollView horizontal>
+              <View className="min-w-[800px]">
+                <DataTable>
                 <DataTable.Header>
                   <DataTable.Title>Payment</DataTable.Title>
                   <DataTable.Title>Client</DataTable.Title>
@@ -423,18 +424,19 @@ export default function PaymentsScreen() {
               </DataTable>
             </View>
           </ScrollView>
-
-          {totalPages > 1 ? (
-            <Pagination
-              currentPage={pagination?.page ?? currentPage}
-              totalPages={totalPages}
-              totalItems={totalItems}
-              pageSize={itemsPerPage}
-              onPageChange={(p) => setCurrentPage(p)}
-            />
-          ) : null}
         </View>
+
+        {totalPages > 1 ? (
+          <Pagination
+            currentPage={pagination?.page ?? currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={itemsPerPage}
+            onPageChange={(p) => setCurrentPage(p)}
+          />
+        ) : null}
       </View>
+    </ScrollView>
 
       <Modal
         visible={Boolean(confirmDelete)}

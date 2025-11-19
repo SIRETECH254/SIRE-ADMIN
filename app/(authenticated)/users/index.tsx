@@ -146,21 +146,22 @@ export default function UsersScreen() {
 
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-gray-950">
-      <View className="px-4 py-4">
-        <View className="mb-4 flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <View>
-            <ThemedText type="title">Users</ThemedText>
-            <Text className="text-gray-600 mt-1">
-              Manage your admin and staff users.
-            </Text>
+      <ScrollView nestedScrollEnabled={true}>
+        <View className="px-4 py-4">
+          <View className="mb-4 flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <View>
+              <ThemedText type="title">Users</ThemedText>
+              <Text className="text-gray-600 mt-1">
+                Manage your admin and staff users.
+              </Text>
+            </View>
+            <Link href="/(authenticated)/users/create" className="btn btn-primary">
+              <Text className="btn-text btn-text-primary">Add User</Text>
+            </Link>
           </View>
-          <Link href="/(authenticated)/users/create" className="btn btn-primary">
-            <Text className="btn-text btn-text-primary">Add User</Text>
-          </Link>
-        </View>
 
-        {/* Toolbar */}
-        <View className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          {/* Toolbar */}
+          <View className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <View className="flex-1">
             <View className="relative">
               <MaterialIcons
@@ -448,6 +449,7 @@ export default function UsersScreen() {
           ) : null}
         </View>
       </View>
+      </ScrollView>
       {/* Delete confirmation modal */}
       <Modal
         visible={Boolean(confirmDelete)}

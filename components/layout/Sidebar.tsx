@@ -46,8 +46,22 @@ export function Sidebar({ isVisible, onClose }: SidebarProps) {
               .replace(/\/+$/, ''); // strip trailing slash
           const currentPath = normalize(pathname || '');
           const targetPath = normalize(String(item.href));
-          const isActive =
-            currentPath === targetPath || currentPath.startsWith(targetPath + '/');
+          
+          // Determine if this nav item is active
+          let isActive = false;
+          
+          // Dashboard (root path) should only match exactly - no other paths should match it
+          const isDashboard = targetPath === '' || targetPath === '/';
+          const isRootPath = currentPath === '' || currentPath === '/';
+          
+          if (isDashboard) {
+            // Dashboard only matches root path
+            isActive = isRootPath;
+          } else {
+            // For other routes, match exact or when current path starts with target path followed by /
+            // But ensure we're not on root path (which would incorrectly match everything)
+            isActive = !isRootPath && (currentPath === targetPath || currentPath.startsWith(targetPath + '/'));
+          }
           return (
             <Pressable
               key={item.href}

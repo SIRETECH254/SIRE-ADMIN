@@ -256,19 +256,20 @@ export default function QuotationsScreen() {
 
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-gray-950">
-      <View className="px-4 py-4">
-        <View className="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <View>
-            <ThemedText type="title">Quotations</ThemedText>
-            <Text className="text-gray-600 mt-1">Track, send, and convert sales quotations.</Text>
+      <ScrollView nestedScrollEnabled={true}>
+        <View className="px-4 py-4">
+          <View className="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <View>
+              <ThemedText type="title">Quotations</ThemedText>
+              <Text className="text-gray-600 mt-1">Track, send, and convert sales quotations.</Text>
+            </View>
+            <Link href="/(authenticated)/quotations/create" className="btn btn-primary self-start">
+              <Text className="btn-text btn-text-primary">Create Quotation</Text>
+            </Link>
           </View>
-          <Link href="/(authenticated)/quotations/create" className="btn btn-primary self-start">
-            <Text className="btn-text btn-text-primary">Create Quotation</Text>
-          </Link>
-        </View>
 
-        {/* Toolbar */}
-        <View className="mt-6 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          {/* Toolbar */}
+          <View className="mt-6 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <View className="flex-1">
             <View className="relative">
               <MaterialIcons name="search" size={18} color="#9ca3af" style={{ position: 'absolute', left: 12, top: 14 }} />
@@ -535,6 +536,7 @@ export default function QuotationsScreen() {
           ) : null}
         </View>
       </View>
+      </ScrollView>
 
       <Modal
         visible={Boolean(confirmDelete)}

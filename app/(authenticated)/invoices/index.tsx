@@ -134,20 +134,21 @@ export default function InvoicesScreen() {
 
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-gray-950">
-      <View className="px-4 py-4">
-        <View className="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <View>
-            <ThemedText type="title">Invoices</ThemedText>
-            <Text className="text-gray-600 mt-1">
-              Monitor billing, payment status, and reminders.
-            </Text>
+      <ScrollView nestedScrollEnabled={true}>
+        <View className="px-4 py-4">
+          <View className="flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <View>
+              <ThemedText type="title">Invoices</ThemedText>
+              <Text className="text-gray-600 mt-1">
+                Monitor billing, payment status, and reminders.
+              </Text>
+            </View>
+            <Link href="/(authenticated)/invoices/create" className="btn btn-primary self-start">
+              <Text className="btn-text btn-text-primary">Create Invoice</Text>
+            </Link>
           </View>
-          <Link href="/(authenticated)/invoices/create" className="btn btn-primary self-start">
-            <Text className="btn-text btn-text-primary">Create Invoice</Text>
-          </Link>
-        </View>
 
-        <View className="mt-6 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <View className="mt-6 flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <View className="flex-1">
             <View className="relative">
               <MaterialIcons
@@ -408,6 +409,7 @@ export default function InvoicesScreen() {
           ) : null}
         </View>
       </View>
+      </ScrollView>
 
     </ThemedView>
   );

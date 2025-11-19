@@ -214,21 +214,22 @@ export default function ProjectsScreen() {
 
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-gray-950">
-      <View className="px-4 py-4">
-        <View className="mb-4 flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
-          <View>
-            <ThemedText type="title">Projects</ThemedText>
-            <Text className="text-gray-600 mt-1">
-              Manage your projects and track progress.
-            </Text>
+      <ScrollView nestedScrollEnabled={true}>
+        <View className="px-4 py-4">
+          <View className="mb-4 flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+            <View>
+              <ThemedText type="title">Projects</ThemedText>
+              <Text className="text-gray-600 mt-1">
+                Manage your projects and track progress.
+              </Text>
+            </View>
+            <Link href="/(authenticated)/projects/create" className="btn btn-primary">
+              <Text className="btn-text btn-text-primary">Add Project</Text>
+            </Link>
           </View>
-          <Link href="/(authenticated)/projects/create" className="btn btn-primary">
-            <Text className="btn-text btn-text-primary">Add Project</Text>
-          </Link>
-        </View>
 
-        {/* Toolbar */}
-        <View className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          {/* Toolbar */}
+          <View className="flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <View className="flex-1">
             <View className="relative">
               <MaterialIcons
@@ -523,6 +524,7 @@ export default function ProjectsScreen() {
           ) : null}
         </View>
       </View>
+      </ScrollView>
       {/* Delete confirmation modal */}
       <Modal
         visible={Boolean(confirmDelete)}
