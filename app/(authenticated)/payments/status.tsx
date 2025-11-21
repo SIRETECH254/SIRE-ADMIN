@@ -93,60 +93,69 @@ export default function PaymentStatusScreen() {
     (resultCode: number, resultMessage: string) => {
       clearPaymentTimers();
 
+      // Helper to get message with fallback
+      const getMessage = (fallback: string) => {
+        return resultMessage?.trim() || fallback;
+      };
+
       switch (resultCode) {
         case 0: {
           // SUCCESS
           setSocketStatus('completed');
+          // Show success message if provided
+          if (resultMessage?.trim()) {
+            setSocketError(null); // Clear any previous error
+          }
           break;
         }
         case 1: {
           setSocketStatus('failed');
-          setSocketError('Insufficient M-Pesa balance');
+          setSocketError(getMessage('Insufficient M-Pesa balance'));
           break;
         }
         case 1032: {
           setSocketStatus('cancelled');
-          setSocketError('Payment cancelled by user');
+          setSocketError(getMessage('Payment cancelled by user'));
           break;
         }
         case 1037: {
           setSocketStatus('failed');
-          setSocketError('Payment timeout - could not reach your phone');
+          setSocketError(getMessage('Payment timeout - could not reach your phone'));
           break;
         }
         case 2001: {
           setSocketStatus('failed');
-          setSocketError('Wrong PIN entered');
+          setSocketError(getMessage('Wrong PIN entered'));
           break;
         }
         case 1001: {
           setSocketStatus('failed');
-          setSocketError('Unable to complete transaction');
+          setSocketError(getMessage('Unable to complete transaction'));
           break;
         }
         case 1019: {
           setSocketStatus('failed');
-          setSocketError('Transaction expired');
+          setSocketError(getMessage('Transaction expired'));
           break;
         }
         case 1025: {
           setSocketStatus('failed');
-          setSocketError('Invalid phone number');
+          setSocketError(getMessage('Invalid phone number'));
           break;
         }
         case 1026: {
           setSocketStatus('failed');
-          setSocketError('System error occurred');
+          setSocketError(getMessage('System error occurred'));
           break;
         }
         case 1036: {
           setSocketStatus('failed');
-          setSocketError('Internal error occurred');
+          setSocketError(getMessage('Internal error occurred'));
           break;
         }
         case 1050: {
           setSocketStatus('failed');
-          setSocketError('Too many payment attempts');
+          setSocketError(getMessage('Too many payment attempts'));
           break;
         }
         case 9999: {
@@ -156,7 +165,7 @@ export default function PaymentStatusScreen() {
         }
         default: {
           setSocketStatus('failed');
-          setSocketError(resultMessage || `Transaction failed with code ${resultCode}`);
+          setSocketError(getMessage(`Transaction failed with code ${resultCode}`));
           break;
         }
       }
@@ -216,9 +225,16 @@ export default function PaymentStatusScreen() {
           socketRef.current.on('callback.received', (payload: any) => {
             console.log('M-Pesa callback received:', payload);
 
-            const resultCode = payload.CODE;
-            const resultMessage = payload.message || 'Payment processing completed';
-            handleMpesaResultCode(resultCode, resultMessage);
+            // Handle both uppercase CODE and lowercase code
+            const resultCode = payload.CODE ?? payload.code ?? payload.Code;
+            // Handle both uppercase MESSAGE and lowercase message
+            const resultMessage = payload.message ?? payload.MESSAGE ?? payload.Message ?? 'Payment processing completed';
+            
+            // Convert code to number if it's a string
+            const codeValue = typeof resultCode === 'string' ? parseInt(resultCode, 10) : (resultCode ?? -1);
+            
+            console.log('Processing callback with code:', codeValue, 'message:', resultMessage);
+            handleMpesaResultCode(codeValue, resultMessage);
           });
 
           socketRef.current.on('payment.updated', (payload: any) => {
@@ -421,7 +437,7 @@ export default function PaymentStatusScreen() {
                   {isCompleted
                     ? 'Your payment has been successfully processed.'
                     : isFailed
-                    ? 'The payment could not be completed. Please try again.'
+                    ? socketError || 'The payment could not be completed. Please try again.'
                     : isMpesa && socketConnected
                     ? 'Waiting for payment confirmation via M-Pesa...'
                     : isMpesa && !socketConnected && !pollingActiveRef.current

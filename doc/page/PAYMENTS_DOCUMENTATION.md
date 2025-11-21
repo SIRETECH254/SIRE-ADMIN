@@ -43,6 +43,7 @@ import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { formatCurrency, formatDate } from '@/utils';
 import { API_BASE_URL } from '@/api/config';
+import { useQueryClient } from '@tanstack/react-query';
 import {
   useGetPayments,
   useGetPayment,
@@ -100,6 +101,7 @@ import { useGetClients } from '@/tanstack/useClients';
 - Status screen:
   - Query params: `paymentId` (primary), `checkoutId` (optional, for M-Pesa)
   - Queries: `useGetPayment(paymentId)` with `refetch`, `useQueryMpesaStatus(checkoutId)` (fallback only, enabled: false)
+  - Query Client: `useQueryClient()` for invalidating payment query after successful WebSocket/fallback responses
   - Socket.IO: Connection state, event listeners, timeout management, refs for socket and timers
   - Local state: `socketConnected`, `socketError`, `socketStatus`, `isFallbackActive`
   - Refs: `socketRef` (Socket instance), `timeoutRef` (fallback timeout), `pollingActiveRef`, `pollingIntervalRef`
@@ -144,6 +146,10 @@ import { useGetClients } from '@/tanstack/useClients';
 - Unified UI for both M-Pesa and Paystack
 - Payment method badge (M-Pesa or Paystack)
 - Current status display with loading indicator
+- **Status Display Card:**
+  - Shows success message when payment is completed
+  - **Displays actual `resultMessage` from WebSocket or fallback API when payment fails** (instead of hardcoded messages)
+  - Shows connection status messages when processing
 - Amount and invoice reference
 - Connection status display showing Socket.IO connection state
 - M-Pesa flow:
@@ -152,13 +158,16 @@ import { useGetClients } from '@/tanstack/useClients';
   - Listen for `callback.received` event (M-Pesa callback from Safaricom)
   - Listen for `payment.updated` event (database updates)
   - Handle M-Pesa result codes (0 = success, 1 = insufficient balance, 1032 = cancelled, etc.)
+  - **Uses actual `resultMessage` from WebSocket payload or fallback API response** (checks both `message` and `MESSAGE` fields)
   - If no response after 60 seconds: fallback to API polling using `useQueryMpesaStatus(checkoutId)`
   - Fallback queries Safaricom directly for payment status
+  - **Invalidates payment query after successful completion** to refresh payment data
 - Paystack flow:
   - Socket.IO connection established on mount
   - Subscribe to payment updates via `subscribe-to-payment` event
   - Listen for `payment.updated` event (database updates)
   - Handle Paystack status values (`completed`, `PAID`, `failed`, `FAILED`)
+  - **Invalidates payment query after successful completion** to refresh payment data
 - Socket.IO connection features:
   - Automatic reconnection (up to 5 attempts with 1 second delay)
   - Connection error handling with user feedback
@@ -168,6 +177,10 @@ import { useGetClients } from '@/tanstack/useClients';
   - View Details (navigate to payment detail page)
   - Retry (if failed, re-initiate payment)
 - Status priority: Socket.IO status takes precedence over API status when available
+- **Query Invalidation:**
+  - After successful WebSocket callback (M-Pesa result code 0 or Paystack completed/PAID), invalidates `['payment', paymentId]` query
+  - After successful fallback API response, invalidates `['payment', paymentId]` query
+  - This triggers automatic refetch of payment data, updating the UI without full page reload
 
 ### Filters, Search & Pagination
 - Status filter options: `all | pending | completed | failed`
@@ -186,9 +199,20 @@ import { useGetClients } from '@/tanstack/useClients';
   - `['payment', paymentId]`
 - `useDeletePayment()` invalidates:
   - `['payments']`
+- **Payment Status Screen Query Invalidation:**
+  - After successful WebSocket callback (M-Pesa result code 0 or Paystack completed/PAID):
+    - Invalidates `['payment', paymentId]` query using `queryClient.invalidateQueries()`
+    - Triggers automatic refetch of payment data
+    - Updates UI without full page reload
+  - After successful fallback API response (M-Pesa status query):
+    - Invalidates `['payment', paymentId]` query
+    - Ensures payment data is refreshed with latest status
 - Payment completion triggers refetch of related invoice
 - Success flows show success `Alert`, then navigate to status or detail page
 - Errors display backend messages from `error.response?.data?.message`
+- **Error Messages:**
+  - Failed payments display actual `resultMessage` from WebSocket or fallback API in the status display card
+  - Falls back to hardcoded messages only if `resultMessage` is empty or not provided
 
 ### Navigation Flow
 - Sidebar "Payments" → `/(authenticated)/payments/index.tsx`
@@ -257,7 +281,18 @@ Payment Status
 Amount: KES 10,000
 Invoice: INV-001
 
-Status: Processing...
+Status Display Card:
+┌─────────────────────────────────┐
+│ [Icon] Status Badge             │
+│                                 │
+│ Description:                    │
+│ - Success: "Your payment has    │
+│   been successfully processed." │
+│ - Failed: Shows actual          │
+│   resultMessage from WebSocket  │
+│   or fallback API               │
+│ - Processing: Connection status │
+└─────────────────────────────────┘
 
 Connection Status:
 Socket.IO: [Connected]
@@ -287,12 +322,17 @@ API Polling: [Active] (if fallback)
    - Should call `refetch()` from `useGetPayment` to get latest payment data via API (ensures API call is visible in network tab)
    - Sets `socketConnected` to `true` and clears `socketError`
 2. `callback.received` - M-Pesa callback from Safaricom
-   - Payload contains `CODE` (result code) and `message`
-   - Handled by `handleMpesaResultCode()` function
+   - Payload contains `CODE`/`code` (result code) and `message`/`MESSAGE` (result message)
+   - **Parses both uppercase and lowercase field names** for compatibility
+   - **Extracts actual `resultMessage` from payload** (checks both `message` and `MESSAGE` fields)
+   - Handled by `handleMpesaResultCode(resultCode, resultMessage)` function
+   - **Uses actual `resultMessage` from WebSocket** instead of hardcoded messages
+   - **Invalidates `['payment', paymentId]` query after successful completion** (result code 0)
    - Clears all timers when final status is received
 3. `payment.updated` - Database payment update
    - Payload contains `paymentId` and `status`
    - Updates local `socketStatus` state if payment ID matches
+   - **Invalidates `['payment', paymentId]` query when status is `completed`** to refresh payment data
    - Clears timers if status is `completed`, `failed`, or `cancelled`
 4. `disconnect` - Socket.IO disconnected
    - Sets `socketConnected` to `false`
@@ -306,8 +346,10 @@ API Polling: [Active] (if fallback)
    - Should call `refetch()` from `useGetPayment` to get latest payment data via API (ensures API call is visible in network tab)
    - Sets `socketConnected` to `true` and clears `socketError`
 2. `payment.updated` - Database payment update
-   - Payload contains `paymentId` and `status`
+   - Payload contains `paymentId`, `status`, and `message` (error message if failed)
    - Handles status values: `completed`, `PAID`, `failed`, `FAILED`
+   - **Uses actual `message` from payload** for error display (falls back to 'Card payment failed' if not provided)
+   - **Invalidates `['payment', paymentId]` query when status is `completed` or `PAID`** to refresh payment data
    - Clears timers when payment reaches final state
 3. `disconnect` - Socket.IO disconnected
    - Sets `socketConnected` to `false`
@@ -329,11 +371,25 @@ API Polling: [Active] (if fallback)
 - `1050` - Too many payment attempts
 - `9999` - Keep waiting (processing)
 
+#### handleMpesaResultCode Function
+- **Uses actual `resultMessage` parameter** from WebSocket or fallback API instead of hardcoded messages
+- **Message Priority:**
+  1. Uses `resultMessage` from WebSocket/fallback if provided and not empty
+  2. Falls back to hardcoded messages only if `resultMessage` is empty or not provided
+- **Query Invalidation:**
+  - After successful completion (result code 0), invalidates `['payment', paymentId]` query
+  - Triggers automatic refetch of payment data to update UI
+- **Error Display:**
+  - Failed payments display the actual `resultMessage` in the status display card
+  - Provides more accurate and contextual error information to users
+
 #### Fallback Mechanism
 - M-Pesa only: After 60 seconds (`FALLBACK_TIMEOUT`), if no Socket.IO update received
 - Queries Safaricom directly via `useQueryMpesaStatus(checkoutId)`
-- Parses result code and description from response
-- Updates payment status based on result code
+- Parses result code and **result message** from response
+- **Uses actual `resultMessage` from fallback API response** instead of hardcoded messages
+- Updates payment status based on result code via `handleMpesaResultCode(resultCode, resultMessage)`
+- **Invalidates `['payment', paymentId]` query after successful completion** (result code 0)
 - Clears all timers and disconnects socket after fallback completes
 
 #### Cleanup
