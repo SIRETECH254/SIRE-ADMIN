@@ -57,7 +57,7 @@ import {
   useUploadAttachment,
   useDeleteAttachment,
 } from '@/tanstack/useProjects';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 import { useGetAllUsers } from '@/tanstack/useUsers';
 import { useGetServices } from '@/tanstack/useServices';
 ```

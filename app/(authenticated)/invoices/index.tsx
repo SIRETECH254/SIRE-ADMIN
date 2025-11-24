@@ -11,7 +11,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import Pagination from '@/components/table/Pagination';
 import { useGetInvoices } from '@/tanstack/useInvoices';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 import { formatCurrency, formatDate } from '@/utils';
 
 type StatusFilter =

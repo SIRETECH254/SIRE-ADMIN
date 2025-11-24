@@ -11,7 +11,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 import {
   useDeleteQuotation,
   useGetQuotations,

@@ -15,7 +15,7 @@ import {
   useMarkAllAsRead,
   useDeleteNotification,
 } from '@/tanstack/useNotifications';
-import { formatDate } from '@/utils';
+import { formatDate, hasRole } from '@/utils';
 import { useAuth } from '@/contexts/AuthContext';
 
 type CategoryFilter = 'all' | 'general' | 'project' | 'invoice' | 'payment' | 'quotation';
@@ -41,9 +41,8 @@ export default function NotificationsScreen() {
 
   // Check if user is admin (can send notifications)
   const isAdmin = useMemo(() => {
-    const role = user?.role;
-    return role === 'super_admin' || role === 'admin';
-  }, [user?.role]);
+    return hasRole(user, 'super_admin') || hasRole(user, 'admin');
+  }, [user]);
 
   // Build params
   const params = useMemo(() => {

@@ -32,37 +32,28 @@ export const authAPI = {
   getMe: () => api.get('/api/auth/me'),
 };
 
-// Client API calls
-export const clientAPI = {
-  // Get all clients (admin)
-  getAllClients: (params?: any) => api.get('/api/clients', { params }),
+// Role API calls
+export const roleAPI = {
+  // Get all roles
+  getAllRoles: (params?: any) => api.get('/api/roles', { params }),
 
-  // Get single client
-  getClient: (id: string) => api.get(`/api/clients/${id}`),
+  // Get single role
+  getRole: (roleId: string) => api.get(`/api/roles/${roleId}`),
 
-  // Register client (public)
-  registerClient: (clientData: any) => api.post('/api/clients/register', clientData),
+  // Create role (super admin)
+  createRole: (roleData: any) => api.post('/api/roles', roleData),
 
-  // Update client
-  updateClient: (id: string, clientData: any) => api.put(`/api/clients/${id}`, clientData),
+  // Update role (super admin)
+  updateRole: (roleId: string, roleData: any) => api.put(`/api/roles/${roleId}`, roleData),
 
-  // Update client status (admin)
-  updateClientStatus: (id: string, statusData: any) => api.put(`/api/clients/${id}/status`, statusData),
+  // Delete role (super admin)
+  deleteRole: (roleId: string) => api.delete(`/api/roles/${roleId}`),
 
-  // Delete client (admin)
-  deleteClient: (id: string) => api.delete(`/api/clients/${id}`),
+  // Get users by role
+  getUsersByRole: (roleId: string, params?: any) => api.get(`/api/roles/${roleId}/users`, { params }),
 
-  // Get client stats
-  getClientStats: (id: string) => api.get(`/api/clients/${id}/stats`),
-
-  // Get client projects
-  getClientProjects: (id: string) => api.get(`/api/clients/${id}/projects`),
-
-  // Get client invoices
-  getClientInvoices: (id: string) => api.get(`/api/clients/${id}/invoices`),
-
-  // Get client payments
-  getClientPayments: (id: string) => api.get(`/api/clients/${id}/payments`),
+  // Get clients (alias for users with client role)
+  getClients: (params?: any) => api.get('/api/roles/client/users', { params }),
 };
 
 // Service API calls
@@ -438,6 +429,15 @@ export const userAPI = {
 
   // Delete user (super admin)
   deleteUser: (userId: string) => api.delete(`/api/users/${userId}`),
+
+  // Get clients (users with client role)
+  getClients: (params?: any) => api.get('/api/users/clients', { params }),
+
+  // Assign role to user (admin)
+  assignRole: (userId: string, roleName: string) => api.post(`/api/users/${userId}/roles`, { roleName }),
+
+  // Remove role from user (admin)
+  removeRole: (userId: string, roleId: string) => api.delete(`/api/users/${userId}/roles/${roleId}`),
 };
 
 // Export default api instance and re-export from config

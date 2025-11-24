@@ -50,7 +50,7 @@ import {
   useCancelInvoice,
   useSendInvoice,
 } from '@/tanstack/useInvoices';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 import { useGetQuotations } from '@/tanstack/useQuotations';
 import { useGetClientPayments } from '@/tanstack/usePayments';
 import { formatCurrency, formatDate } from '@/utils';

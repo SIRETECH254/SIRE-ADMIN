@@ -6,7 +6,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
-import { useRegisterClient } from '@/tanstack/useClients';
+import { useAdminCreateUser } from '@/tanstack/useUsers';
 
 type InlineStatus =
   | {
@@ -17,7 +17,7 @@ type InlineStatus =
 
 export default function CreateClientScreen() {
   const router = useRouter();
-  const { mutateAsync, isPending } = useRegisterClient();
+  const { mutateAsync, isPending } = useAdminCreateUser();
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -60,8 +60,9 @@ export default function CreateClientScreen() {
         address: trimmedAddress || undefined,
         city: trimmedCity || undefined,
         country: trimmedCountry || undefined,
+        roleNames: ['client'],
       } as any);
-      const createdClient = result?.data?.client ?? result?.client;
+      const createdClient = result?.data?.user ?? result?.user ?? result?.data?.client ?? result?.client;
       setInlineStatus({ type: 'success', text: 'Client created successfully.' });
       setTimeout(() => {
         if (createdClient?._id || createdClient?.id) {

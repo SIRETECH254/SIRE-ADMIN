@@ -50,7 +50,7 @@ import {
   useUpdateNotificationPreferences,
 } from '@/tanstack/useNotifications';
 import { useGetAllUsers } from '@/tanstack/useUsers';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 ```
 
 ### Data Sources

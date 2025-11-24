@@ -9,7 +9,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
 import { useSendNotification } from '@/tanstack/useNotifications';
 import { useGetAllUsers } from '@/tanstack/useUsers';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 
 type InlineStatus =
   | {

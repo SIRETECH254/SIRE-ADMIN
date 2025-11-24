@@ -1,7 +1,7 @@
 // Export all hooks from tanstack folder
 
-// Client hooks
-export * from './useClients';
+// Role hooks
+export * from './useRoles';
 
 // Service hooks
 export * from './useServices';

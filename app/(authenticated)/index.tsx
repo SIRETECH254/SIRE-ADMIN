@@ -10,12 +10,12 @@ import { Badge } from '@/components/ui/Badge';
 import { Loading } from '@/components/ui/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetAdminDashboard, useGetClientDashboard } from '@/tanstack/useDashboard';
-import { formatCurrency, formatDate } from '@/utils';
+import { formatCurrency, formatDate, hasRole } from '@/utils';
 
 export default function DashboardScreen() {
   const router = useRouter();
   const { user } = useAuth();
-  const isClient = user?.role === 'client';
+  const isClient = hasRole(user, 'client');
 
   const { data: adminData, isLoading: adminLoading, error: adminError } = useGetAdminDashboard();
   const { data: clientData, isLoading: clientLoading, error: clientError } = useGetClientDashboard();

@@ -42,28 +42,30 @@ import { ThemedView } from '@/components/themed-view';
 import { getInitials, formatDate } from '@/utils';
 import {
   useGetClients,
-  useGetClient,
-  useRegisterClient,
-  useUpdateClient,
-  useUpdateClientStatus,
-  useDeleteClient,
-} from '@/tanstack/useClients';
+  useGetUserById,
+  useAdminCreateUser,
+  useUpdateUser,
+  useUpdateUserStatus,
+  useDeleteUser,
+} from '@/tanstack/useUsers';
 ```
 
 ### Data Sources
-- Primary API (see server docs `SIRE-API/doc/CLIENT_DOCUMENTATION.md`):
-  - `GET /api/clients` (list with pagination, filters, search)
-  - `GET /api/clients/:clientId` (details)
-  - `PUT /api/clients/:clientId` (profile update: firstName, lastName, phone, company, address, city, country)
-  - `PUT /api/clients/:clientId/status` (update `isActive`)
-  - `POST /api/clients/register` (create)
+- Primary API (see server docs):
+  - `GET /api/users/clients` (list clients - users with client role)
+  - `GET /api/users/:userId` (get user/client details)
+  - `PUT /api/users/:userId` (profile update: firstName, lastName, phone, company, address, city, country)
+  - `PUT /api/users/:userId/status` (update `isActive`)
+  - `POST /api/users/admin-create` (create client with `roleNames: ['client']`)
+  - `DELETE /api/users/:userId` (delete client)
 - TanStack Query hooks:
-  - `useGetClients(params)` for list
-  - `useGetClient(clientId)` for details
-  - `useRegisterClient()` for create
-  - `useUpdateClient()` for profile edit
-  - `useUpdateClientStatus()` for active toggle
-  - `useDeleteClient()` for delete
+  - `useGetClients(params)` for list (from `useUsers` hook)
+  - `useGetUserById(userId)` for details (from `useUsers` hook)
+  - `useAdminCreateUser()` for create with `roleNames: ['client']` (from `useUsers` hook)
+  - `useUpdateUser()` for profile edit (from `useUsers` hook)
+  - `useUpdateUserStatus()` for active toggle (from `useUsers` hook)
+  - `useDeleteUser()` for delete (from `useUsers` hook)
+- **Note**: Clients are now users with the "client" role. All client operations use the user API endpoints.
 
 ### Hooks & State
 - List screen:
@@ -72,14 +74,14 @@ import {
   - Query: `useGetClients(params)` providing `{ data, isLoading }`
 - Details screen:
   - Param: `id` from route
-  - Query: `useGetClient(id)`
+  - Query: `useGetUserById(id)` (returns user with client role)
 - Edit screen:
   - Param: `id`
-  - Query: `useGetClient(id)` for initial values
-  - Mutations: `useUpdateClient()` and `useUpdateClientStatus()` (when status changes)
+  - Query: `useGetUserById(id)` for initial values
+  - Mutations: `useUpdateUser()` and `useUpdateUserStatus()` (when status changes)
   - Local: `firstName`, `lastName`, `email (disabled)`, `phone`, `company`, `address`, `city`, `country`, `isActive`, `inlineStatus`
 - Create screen:
-  - Mutation: `useRegisterClient()`
+  - Mutation: `useAdminCreateUser()` with `roleNames: ['client']`
   - Local: `firstName`, `lastName`, `email`, `password`, `phone`, `company`, `address`, `city`, `country`, `inlineStatus`
 
 ### Clients List UI
@@ -124,8 +126,10 @@ import {
   - `firstName`, `lastName`, `email`, `password` (required)
   - `phone`, `company`, `address`, `city`, `country` (optional)
 - Submit:
-  - `useRegisterClient()` to `POST /api/clients/register`
+  - `useAdminCreateUser()` with `roleNames: ['client']` to `POST /api/users/admin-create`
+  - Automatically assigns "client" role to the new user
   - On success navigate to details
+- **Note**: Clients are created as users with the client role automatically assigned.
 
 ### Filters, Search & Pagination
 - Status filter options: `all | active | inactive`
@@ -135,15 +139,16 @@ import {
 - Rendering rule: pagination is hidden when total pages ≤ 1
 
 ### Mutation & Cache Behaviour
-- `useUpdateClient()` invalidates:
-  - `['clients']`
-  - `['client', clientId]`
-- `useUpdateClientStatus()` invalidates:
-  - `['clients']`
-  - `['client', clientId]`
-- `useRegisterClient()` invalidates `['clients']`
+- `useUpdateUser()` invalidates:
+  - `['users']` (includes clients)
+  - `['user', userId]`
+- `useUpdateUserStatus()` invalidates:
+  - `['users']` (includes clients)
+  - `['user', userId]`
+- `useAdminCreateUser()` invalidates `['users']` (includes clients list)
 - Success flows show success `Alert`, then navigate back or to details
 - Errors display backend messages from `error.response?.data?.message`
+- **Note**: Query keys now use `['users']` instead of `['clients']` since clients are users
 
 ### Navigation Flow
 - Sidebar “Clients” → `/(authenticated)/clients/index.tsx`

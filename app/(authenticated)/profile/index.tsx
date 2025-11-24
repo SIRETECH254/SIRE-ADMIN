@@ -7,7 +7,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import { Loading } from '@/components/ui/Loading';
 import { ThemedView } from '@/components/themed-view';
-import { getInitials, formatDate as formatDateUtil } from '@/utils';
+import { getInitials, formatDate as formatDateUtil, getRoleNames } from '@/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useThemeToggle } from '@/hooks/use-theme-toggle';
 import { useGetProfile } from '@/tanstack/useUsers';
@@ -29,6 +29,8 @@ export default function ProfileScreen() {
   }, [data?.data?.user, user]);
 
   const initials = useMemo(() => getInitials(profile ? { firstName: profile?.firstName, lastName: profile?.lastName, email: profile?.email } : null), [profile]);
+  const roleNames = useMemo(() => getRoleNames(profile), [profile]);
+  const rolesDisplay = roleNames.length > 0 ? roleNames.join(', ') : (profile?.role ?? '—');
 
   const formatDate = (value?: string) => formatDateUtil(value);
 
@@ -76,7 +78,7 @@ export default function ProfileScreen() {
               </Text>
               <View className="flex-row items-center gap-2">
                 <Badge variant="info" size="sm">
-                  {profile?.role ?? '—'}
+                  {rolesDisplay}
                 </Badge>
                 <Badge variant={profile?.isActive ? 'success' : 'error'} size="sm">
                   {profile?.isActive ? 'Active' : 'Inactive'}
@@ -136,7 +138,7 @@ export default function ProfileScreen() {
                   iconColor={colorScheme === 'dark' ? '#e5e7eb' : '#6b7280'}
                   badgeContent={
                     <Badge variant="info" size="sm">
-                      {profile?.role ?? '—'}
+                      {rolesDisplay}
                     </Badge>
                   }
                 />

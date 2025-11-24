@@ -11,7 +11,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { useGetProject, useUpdateProject } from '@/tanstack/useProjects';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 import { useGetServices } from '@/tanstack/useServices';
 import { useGetAllUsers } from '@/tanstack/useUsers';
 

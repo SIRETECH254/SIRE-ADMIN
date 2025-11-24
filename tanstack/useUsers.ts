@@ -215,24 +215,83 @@ export const useGetUserRoles = (userId: string) => {
   });
 };
 
-// Delete user (super admin)
-export const useDeleteUser = () => {
-  const queryClient = useQueryClient();
+  // Delete user (super admin)
+  export const useDeleteUser = () => {
+    const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: async (userId: string) => {
-      const response = await userAPI.deleteUser(userId);
-      return response.data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
-      console.log('User deleted successfully');
-    },
-    onError: (error: any) => {
-      console.error('Delete user error:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to delete user';
-      console.error('Error:', errorMessage);
-    },
-  });
-};
+    return useMutation({
+      mutationFn: async (userId: string) => {
+        const response = await userAPI.deleteUser(userId);
+        return response.data;
+      },
+      onSuccess: (data) => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        console.log('User deleted successfully');
+      },
+      onError: (error: any) => {
+        console.error('Delete user error:', error);
+        const errorMessage = error.response?.data?.message || 'Failed to delete user';
+        console.error('Error:', errorMessage);
+      },
+    });
+  };
+
+  // Get clients (users with client role)
+  export const useGetClients = (params: any = {}) => {
+    return useQuery({
+      queryKey: ['users', 'clients', params],
+      queryFn: async () => {
+        const response = await userAPI.getClients(params);
+        return response.data;
+      },
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 10, // 10 minutes
+    });
+  };
+
+  // Assign role to user (admin)
+  export const useAssignRole = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: async ({ userId, roleName }: { userId: string; roleName: string }) => {
+        const response = await userAPI.assignRole(userId, roleName);
+        return response.data;
+      },
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['user', variables.userId] });
+        queryClient.invalidateQueries({ queryKey: ['user', variables.userId, 'roles'] });
+        console.log('Role assigned successfully');
+      },
+      onError: (error: any) => {
+        console.error('Assign role error:', error);
+        const errorMessage = error.response?.data?.message || 'Failed to assign role';
+        console.error('Error:', errorMessage);
+      },
+    });
+  };
+
+  // Remove role from user (admin)
+  export const useRemoveRole = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+      mutationFn: async ({ userId, roleId }: { userId: string; roleId: string }) => {
+        const response = await userAPI.removeRole(userId, roleId);
+        return response.data;
+      },
+      onSuccess: (data, variables) => {
+        queryClient.invalidateQueries({ queryKey: ['users'] });
+        queryClient.invalidateQueries({ queryKey: ['user', variables.userId] });
+        queryClient.invalidateQueries({ queryKey: ['user', variables.userId, 'roles'] });
+        console.log('Role removed successfully');
+      },
+      onError: (error: any) => {
+        console.error('Remove role error:', error);
+        const errorMessage = error.response?.data?.message || 'Failed to remove role';
+        console.error('Error:', errorMessage);
+      },
+    });
+  };
 

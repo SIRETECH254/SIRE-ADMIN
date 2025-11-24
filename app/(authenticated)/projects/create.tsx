@@ -10,7 +10,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
 import { useCreateProject } from '@/tanstack/useProjects';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 import { useGetServices } from '@/tanstack/useServices';
 import { useGetAllUsers } from '@/tanstack/useUsers';
 

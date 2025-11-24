@@ -11,7 +11,7 @@ import { Modal } from '@/components/ui/Modal';
 import { useGetAllUsers, useDeleteUser } from '@/tanstack/useUsers';
 import { Picker } from '@react-native-picker/picker';
 import { DataTable } from 'react-native-paper';
-import { getInitials, formatDate as formatDateUtil } from '@/utils';
+import { getInitials, formatDate as formatDateUtil, getRoleNames } from '@/utils';
 import Pagination from '@/components/table/Pagination';
 
 type RoleOption =
@@ -395,7 +395,7 @@ export default function UsersScreen() {
                               variant="info"
                               size="sm"
                               icon={<MaterialIcons name="workspace-premium" size={14} color="#000000" />}>
-                              {u?.role ?? '—'}
+                              {getRoleNames(u).join(', ') || (u?.role ?? '—')}
                             </Badge>
                           </DataTable.Cell>
                           {/* Status cell */}

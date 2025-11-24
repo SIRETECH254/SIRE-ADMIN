@@ -53,10 +53,10 @@ export default function TestimonialsScreen() {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Check if user is admin
+  const { hasRole } = require('@/utils');
   const isAdmin = useMemo(() => {
-    const role = user?.role;
-    return role === 'super_admin' || role === 'finance' || role === 'project_manager';
-  }, [user?.role]);
+    return hasRole(user, 'super_admin') || hasRole(user, 'finance') || hasRole(user, 'project_manager');
+  }, [user]);
 
   // Debounce search
   React.useEffect(() => {

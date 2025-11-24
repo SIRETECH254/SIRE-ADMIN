@@ -53,7 +53,7 @@ import {
   useQueryMpesaStatus,
 } from '@/tanstack/usePayments';
 import { useGetInvoices } from '@/tanstack/useInvoices';
-import { useGetClients } from '@/tanstack/useClients';
+import { useGetClients } from '@/tanstack/useUsers';
 ```
 
 ### Data Sources

@@ -11,7 +11,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
-import { useGetClients, useDeleteClient } from '@/tanstack/useClients';
+import { useGetClients, useDeleteUser } from '@/tanstack/useUsers';
 import { getInitials, formatDate as formatDateUtil } from '@/utils';
 
 type StatusFilter = 'all' | 'active' | 'inactive';
@@ -50,7 +50,7 @@ export default function ClientsScreen() {
   }, [currentPage, itemsPerPage, debouncedSearch, filterStatus, filterVerification]);
 
   const { data, isLoading, error, refetch } = useGetClients(params);
-  const { mutateAsync: deleteClientAsync, isPending: isDeleting } = useDeleteClient();
+  const { mutateAsync: deleteUserAsync, isPending: isDeleting } = useDeleteUser();
 
   const clients = useMemo(() => {
     const root = data?.data ?? {};
@@ -117,7 +117,7 @@ export default function ClientsScreen() {
     try {
       setDeletingId(confirmDelete.id);
       setDeleteError(null);
-      await deleteClientAsync(confirmDelete.id);
+      await deleteUserAsync(confirmDelete.id);
       setConfirmDelete(null);
       await refetch();
     } catch (err: any) {
@@ -127,7 +127,7 @@ export default function ClientsScreen() {
     } finally {
       setDeletingId(null);
     }
-  }, [confirmDelete, deleteClientAsync, refetch]);
+  }, [confirmDelete, deleteUserAsync, refetch]);
 
   const handleCancelDelete = useCallback(() => {
     setConfirmDelete(null);

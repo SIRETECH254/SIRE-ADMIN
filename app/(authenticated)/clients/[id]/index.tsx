@@ -8,7 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/Badge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
-import { useGetClient } from '@/tanstack/useClients';
+import { useGetUserById } from '@/tanstack/useUsers';
 import { getInitials, formatDate as formatDateUtil } from '@/utils';
 
 export default function ClientDetailsScreen() {
@@ -16,7 +16,7 @@ export default function ClientDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id ?? '';
 
-  const { data, isLoading, error } = useGetClient(id);
+  const { data, isLoading, error } = useGetUserById(id);
   const client = data?.data?.client ?? data?.data ?? null;
 
   const initials = useMemo(() => getInitials(client ? { firstName: client?.firstName, lastName: client?.lastName, email: client?.email } : null), [client]);

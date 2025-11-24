@@ -6,7 +6,7 @@ import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
-import { useGetClient, useUpdateClient, useUpdateClientStatus } from '@/tanstack/useClients';
+import { useGetUserById, useUpdateUser, useUpdateUserStatus } from '@/tanstack/useUsers';
 
 type InlineStatus =
   | {
@@ -20,9 +20,9 @@ export default function EditClientScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id ?? '';
 
-  const { data, isLoading } = useGetClient(id);
-  const { mutateAsync: updateClientAsync, isPending: updatingProfile } = useUpdateClient();
-  const { mutateAsync: updateStatusAsync, isPending: updatingStatus } = useUpdateClientStatus();
+  const { data, isLoading } = useGetUserById(id);
+  const { mutateAsync: updateUserAsync, isPending: updatingProfile } = useUpdateUser();
+  const { mutateAsync: updateStatusAsync, isPending: updatingStatus } = useUpdateUserStatus();
 
   const existing = data?.data?.client ?? data?.data ?? null;
 
@@ -70,9 +70,9 @@ export default function EditClientScreen() {
     setInlineStatus(null);
     try {
       // Profile fields update
-      await updateClientAsync({
-        clientId: id,
-        clientData: {
+      await updateUserAsync({
+        userId: id,
+        userData: {
           firstName: trimmedFirst,
           lastName: trimmedLast,
           phone: trimmedPhone || undefined,
@@ -85,7 +85,7 @@ export default function EditClientScreen() {
 
       // Status update if changed
       if (isActive !== originalActive) {
-        await updateStatusAsync({ clientId: id, isActive });
+        await updateStatusAsync({ userId: id, statusData: { isActive } });
       }
 
       setInlineStatus({ type: 'success', text: 'Client updated successfully.' });
@@ -105,7 +105,7 @@ export default function EditClientScreen() {
     country,
     isActive,
     originalActive,
-    updateClientAsync,
+    updateUserAsync,
     updateStatusAsync,
     id,
     router,
