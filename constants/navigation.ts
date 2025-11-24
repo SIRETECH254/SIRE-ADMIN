@@ -12,7 +12,7 @@ export type AuthNavItem = {
 export const AUTH_NAV_ITEMS = [
   {
     label: 'Dashboard',
-    href: '/(authenticated)/dashboard',
+    href: '/(authenticated)/',
     icon: 'dashboard',
   },
   {

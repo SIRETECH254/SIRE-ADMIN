@@ -8,7 +8,7 @@ import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/Badge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
-import { useGetClient } from '@/tanstack/useClients';
+import { useGetUserById } from '@/tanstack/useUsers';
 import { getInitials, formatDate as formatDateUtil } from '@/utils';
 
 export default function ClientDetailsScreen() {
@@ -16,8 +16,8 @@ export default function ClientDetailsScreen() {
   const params = useLocalSearchParams<{ id?: string | string[] }>();
   const id = Array.isArray(params.id) ? params.id[0] : params.id ?? '';
 
-  const { data, isLoading, error } = useGetClient(id);
-  const client = data?.data?.client ?? data?.data ?? null;
+  const { data, isLoading, error } = useGetUserById(id);
+  const client = data?.data?.user ?? data?.data ?? null;
 
   const initials = useMemo(() => getInitials(client ? { firstName: client?.firstName, lastName: client?.lastName, email: client?.email } : null), [client]);
   const formatDate = (value?: string) => formatDateUtil(value);
@@ -25,8 +25,9 @@ export default function ClientDetailsScreen() {
     (error as any)?.response?.data?.message ?? (error as Error)?.message ?? null;
 
   if (isLoading && !client) {
-    return <Loading fullScreen message="Loading client..." />;
-  }
+    return <Loading fullScreen message="Loading client details..." />;
+  }  
+
 
   return (
     <ThemedView className="flex-1 bg-slate-50 dark:bg-gray-950">

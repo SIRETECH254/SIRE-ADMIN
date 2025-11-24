@@ -142,14 +142,14 @@ export const useInitiatePayment = () => {
 };
 
 // Query M-Pesa payment status
-export const useQueryMpesaStatus = (checkoutRequestId: string) => {
+export const useQueryMpesaStatus = (checkoutRequestId: string, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: ['payments', 'mpesa-status', checkoutRequestId],
     queryFn: async () => {
       const response = await paymentAPI.queryMpesaStatus(checkoutRequestId);
       return response.data;
     },
-    enabled: !!checkoutRequestId,
+    enabled: options?.enabled !== undefined ? options.enabled : !!checkoutRequestId,
     staleTime: 1000 * 30, // 30 seconds (shorter for payment status)
     gcTime: 1000 * 60 * 5, // 5 minutes
   });

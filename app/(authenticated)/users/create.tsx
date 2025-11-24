@@ -58,7 +58,7 @@ export default function CreateUserScreen() {
         email: trimmedEmail,
         password: trimmedPassword,
         phone: trimmedPhone || undefined,
-        role,
+        roleNames: [role],
       } as any);
       const createdUser = result?.data?.user ?? result?.user;
       setInlineStatus({ type: 'success', text: 'User created successfully.' });

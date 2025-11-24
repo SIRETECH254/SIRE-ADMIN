@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
-import { getInitials, formatDate as formatDateUtil } from '@/utils';
+import { getInitials, formatDate as formatDateUtil, getRoleNames } from '@/utils';
 import { ThemedText } from '@/components/themed-text';
 import { Badge } from '@/components/ui/Badge';
 import { Alert } from '@/components/ui/Alert';
@@ -20,6 +20,8 @@ export default function UserDetailsScreen() {
   const user = data?.data?.user ?? data?.data ?? null;
 
   const initials = useMemo(() => getInitials(user ? { firstName: user?.firstName, lastName: user?.lastName, email: user?.email } : null), [user]);
+  const roleNames = useMemo(() => getRoleNames(user), [user]);
+  const rolesDisplay = roleNames.length > 0 ? roleNames.join(', ') : (user?.role ?? '—');
 
   const formatDate = (value?: string) => formatDateUtil(value);
 
@@ -70,7 +72,7 @@ export default function UserDetailsScreen() {
                   variant="info"
                   size="sm"
                   icon={<MaterialIcons name="workspace-premium" size={14} color="#000000" />}>
-                  {user?.role ?? '—'}
+                  {rolesDisplay}
                 </Badge>
                 <Badge
                   variant={user?.isActive ? 'success' : 'error'}
