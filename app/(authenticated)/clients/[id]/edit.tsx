@@ -24,7 +24,7 @@ export default function EditClientScreen() {
   const { mutateAsync: updateUserAsync, isPending: updatingProfile } = useUpdateUser();
   const { mutateAsync: updateStatusAsync, isPending: updatingStatus } = useUpdateUserStatus();
 
-  const existing = data?.data?.client ?? data?.data ?? null;
+  const existing = data?.data?.user ?? data?.data ?? null;
 
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
