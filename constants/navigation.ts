@@ -66,6 +66,11 @@ export const AUTH_NAV_ITEMS = [
     icon: 'admin-panel-settings',
   },
   {
+    label: 'Roles',
+    href: '/(authenticated)/roles',
+    icon: 'verified-user',
+  },
+  {
     label: 'Profile',
     href: '/(authenticated)/profile',
     icon: 'person',

@@ -217,12 +217,11 @@ export default function RolesScreen() {
       <View className="px-4 pb-6">
         <View className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
           <ScrollView horizontal>
-            <View className="min-w-[800px]">
+            <View className="min-w-[700px]">
               <DataTable>
                 <DataTable.Header>
                   <DataTable.Title>Role Name</DataTable.Title>
                   <DataTable.Title>Display Name</DataTable.Title>
-                  <DataTable.Title>Description</DataTable.Title>
                   <DataTable.Title>Status</DataTable.Title>
                   <DataTable.Title>Created</DataTable.Title>
                   <DataTable.Title numeric>Actions</DataTable.Title>
@@ -237,9 +236,6 @@ export default function RolesScreen() {
                         </DataTable.Cell>
                         <DataTable.Cell>
                           <View className="h-4 w-24 rounded-md bg-gray-300 animate-pulse" />
-                        </DataTable.Cell>
-                        <DataTable.Cell>
-                          <View className="h-4 w-32 rounded-md bg-gray-300 animate-pulse" />
                         </DataTable.Cell>
                         <DataTable.Cell>
                           <View className="h-5 w-14 rounded-md bg-gray-300 animate-pulse" />
@@ -270,14 +266,13 @@ export default function RolesScreen() {
                     <DataTable.Cell />
                     <DataTable.Cell />
                     <DataTable.Cell />
-                    <DataTable.Cell />
                   </DataTable.Row>
                 ) : null}
 
                 {/* Empty row */}
                 {!isLoading && !errorMessage && roles.length === 0 ? (
                   <DataTable.Row>
-                    <DataTable.Cell colSpan={6}>
+                    <DataTable.Cell colSpan={5}>
                       <View className="py-8">
                         <View className="flex-row items-center gap-2">
                           <MaterialIcons name="admin-panel-settings" size={20} color="#7b1c1c" />
@@ -305,14 +300,6 @@ export default function RolesScreen() {
                           <DataTable.Cell>
                             <Text className="font-inter text-sm text-gray-900">
                               {role?.displayName ?? '—'}
-                            </Text>
-                          </DataTable.Cell>
-                          <DataTable.Cell>
-                            <Text
-                              className="font-inter text-sm text-gray-700"
-                              numberOfLines={1}
-                              ellipsizeMode="tail">
-                              {role?.description ?? '—'}
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell>
