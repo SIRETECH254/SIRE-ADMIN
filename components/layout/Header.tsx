@@ -82,11 +82,10 @@ export function Header({ onToggleSidebar, isSidebarOpen }: HeaderProps) {
 
   /**
    * Extract unread notification count from API response
-   * Handles various response structures and defaults to 0
+   * Aligned with simplified hook data
    */
   const unreadCount = useMemo(() => {
-    const root = unreadCountData?.data ?? unreadCountData;
-    return root?.data?.count ?? root?.count ?? root?.data ?? 0;
+    return unreadCountData ?? 0;
   }, [unreadCountData]);
 
   /**

@@ -20,7 +20,8 @@ export const useGetUnreadCount = () => {
     queryKey: ['notifications', 'unread-count'],
     queryFn: async () => {
       const response = await notificationAPI.getUnreadCount();
-      return response.data;
+      // Aligns with response structure: { success: true, data: { unreadCount: 37 } }
+      return response.data?.data?.unreadCount ?? response.data?.unreadCount ?? 0;
     },
     staleTime: 1000 * 30, // 30 seconds (unread count should be very fresh)
     gcTime: 1000 * 60 * 2, // 2 minutes

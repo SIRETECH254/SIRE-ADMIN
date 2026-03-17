@@ -5,6 +5,7 @@
 - [Context and State Management](#context-and-state-management)
 - [UI Structure](#ui-structure)
 - [Planned Layout](#planned-layout)
+- [Sketch Wireframe](#sketch-wireframe)
 - [Form Inputs](#form-inputs)
 - [API Integration](#api-integration)
 - [Components Used](#components-used)
@@ -105,6 +106,28 @@ const isLoading = useSelector((state: RootState) => state.auth.isLoading);
 ├───────────────────────────────┤
 │      “Create account” CTA     │
 └───────────────────────────────┘
+```
+
+## Sketch Wireframe
+```
+┌───────────────────────────────────────────────────────────────┐
+│                                                               │
+│  ┌──────────────┐              ┌──────────────────────────┐   │
+│  │              │              │                          │   │
+│  │    Logo      │              │  📧 Email Input          │   │
+│  │              │              │                          │   │
+│  └──────────────┘              │  🔒 Password       [👁]  │   │
+│                                │                          │   │
+│  Sign in to your account       │  [ ] Remember    Forgot?  │   │
+│  Welcome back! Please enter    │                          │   │
+│  your details.                 │  ┌────────────────────┐  │   │
+│                                │  │     Sign in        │  │   │
+│                                │  └────────────────────┘  │   │
+│                                │                          │   │
+│                                │  Create account          │   │
+│                                └──────────────────────────┘   │
+│                                                               │
+└───────────────────────────────────────────────────────────────┘
 ```
 
 ## Form Inputs
@@ -293,4 +316,3 @@ Form state is managed with React's `useState` hooks to keep the implementation l
 - Expand the card layout to use shared design-system utilities once global component classes are finalized.
 - Offer social sign-in placeholders (if backend support arrives).
 - Display rate-limiting or account lockout feedback when the API returns those states.
-
