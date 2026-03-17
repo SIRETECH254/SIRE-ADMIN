@@ -7,7 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import { useGetPayment, useUpdatePayment, useDeletePayment } from '@/tanstack/usePayments';
@@ -159,36 +159,11 @@ export default function PaymentDetailScreen() {
                 <Text className="text-gray-600">{formatDate(createdAt)}</Text>
               </View>
               <View className="flex-row items-center gap-2">
-                <Badge
-                  variant={isMpesa ? 'info' : 'default'}
-                  size="md"
-                  icon={
-                    <MaterialIcons
-                      name={isMpesa ? 'phone-android' : 'credit-card'}
-                      size={16}
-                      color="#7b1c1c"
-                    />
-                  }>
-                  {isMpesa ? 'M-Pesa' : method === 'paystack' ? 'Paystack' : method}
-                </Badge>
-                <Badge
-                  variant={statusConfig.variant}
-                  size="md"
-                  icon={
-                    <MaterialIcons
-                      name={statusConfig.icon}
-                      size={16}
-                      color={
-                        statusConfig.variant === 'error'
-                          ? '#a33c3c'
-                          : statusConfig.variant === 'success'
-                          ? '#059669'
-                          : '#7b1c1c'
-                      }
-                    />
-                  }>
-                  {statusConfig.label}
-                </Badge>
+                <StatusBadge status={isMpesa ? 'M-Pesa' : method === 'paystack' ? 'Paystack' : method} />
+                <StatusBadge
+                  status={statusValue}
+                  type="payment-status"
+                />
               </View>
             </View>
             {inlineStatus ? (

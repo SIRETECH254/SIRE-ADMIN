@@ -7,7 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import {
   useGetAllMessages,
@@ -262,9 +262,10 @@ export default function ContactScreen() {
                   } p-4`}>
                   <View className="flex-row items-start justify-between gap-3 mb-2">
                     <View className="flex-1 flex-row items-center gap-2 flex-wrap">
-                      <Badge variant={statusVariant} size="sm">
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                      </Badge>
+                      <StatusBadge
+                        status={status}
+                        type="contact-status"
+                      />
                       {status === 'unread' && (
                         <View className="h-2 w-2 rounded-full bg-brand-primary" />
                       )}

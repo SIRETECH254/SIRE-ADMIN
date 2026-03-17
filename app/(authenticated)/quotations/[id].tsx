@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import {
@@ -174,18 +174,10 @@ export default function QuotationDetailScreen() {
                 <ThemedText type="title">{quotation?.quotationNumber ?? 'Quotation'}</ThemedText>
                 <Text className="text-gray-600">{formatDate(quotation?.issueDate)}</Text>
               </View>
-              <Badge
-                variant={badgeVariant}
-                size="md"
-                icon={
-                  <MaterialIcons
-                    name={statusIconMap[statusValue] ?? 'info-outline'}
-                    size={14}
-                    color="#7b1c1c"
-                  />
-                }>
-                {badgeLabel}
-              </Badge>
+              <StatusBadge
+                status={statusValue}
+                type="quotation-status"
+              />
             </View>
             {inlineStatus ? <Alert variant={inlineStatus.type} message={inlineStatus.text} className="w-full" /> : null}
           </View>

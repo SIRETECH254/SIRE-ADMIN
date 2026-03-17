@@ -5,7 +5,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { useGetProject } from '@/tanstack/useProjects';
@@ -103,31 +103,14 @@ export default function ProjectDetailsScreen() {
               </Text>
             </View>
             <View className="flex-row items-center gap-2 flex-wrap">
-              <Badge
-                variant={getStatusVariant(project?.status)}
-                size="sm"
-                icon={
-                  <MaterialIcons
-                    name={getStatusIcon(project?.status) as any}
-                    size={14}
-                    color={
-                      project?.status === 'completed'
-                        ? '#059669'
-                        : project?.status === 'in_progress'
-                        ? '#2563eb'
-                        : project?.status === 'on_hold'
-                        ? '#f59e0b'
-                        : project?.status === 'cancelled'
-                        ? '#dc2626'
-                        : '#6b7280'
-                    }
-                  />
-                }>
-                {project?.status?.replace('_', ' ') ?? 'pending'}
-              </Badge>
-              <Badge variant={getPriorityVariant(project?.priority)} size="sm">
-                {project?.priority ?? 'low'} priority
-              </Badge>
+              <StatusBadge
+                status={project?.status ?? 'pending'}
+                type="project-status"
+              />
+              <StatusBadge
+                status={project?.priority ?? 'low'}
+                type="priority-status"
+              />
             </View>
           </View>
 
@@ -214,9 +197,7 @@ export default function ProjectDetailsScreen() {
                 </Text>
                 <View className="flex-row flex-wrap gap-2">
                   {services.map((service: any) => (
-                    <Badge key={service._id || service.id} variant="info" size="sm">
-                      {service.name ?? service.title ?? '—'}
-                    </Badge>
+                    <StatusBadge key={service._id || service.id} status={service.name ?? service.title ?? '—'} />
                   ))}
                 </View>
               </View>
@@ -330,18 +311,10 @@ export default function ProjectDetailsScreen() {
                             </Text>
                           ) : null}
                         </View>
-                        <Badge
-                          variant={milestone.completed ? 'success' : 'default'}
-                          size="sm"
-                          icon={
-                            <MaterialIcons
-                              name={milestone.completed ? 'check-circle' : 'schedule'}
-                              size={14}
-                              color={milestone.completed ? '#059669' : '#6b7280'}
-                            />
-                          }>
-                          {milestone.completed ? 'Completed' : 'Pending'}
-                        </Badge>
+                        <StatusBadge
+                          status={milestone.completed ? 'Completed' : 'Pending'}
+                          type="project-status"
+                        />
                       </View>
                     );
                   })}

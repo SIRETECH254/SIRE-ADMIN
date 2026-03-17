@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
 import { useGetServices, useDeleteService, useToggleServiceStatus } from '@/tanstack/useServices';
@@ -341,24 +341,14 @@ export default function ServicesScreen() {
                           </DataTable.Cell>
                           {/* Features count */}
                           <DataTable.Cell>
-                            <Badge variant="info" size="sm">
-                              {featuresCount} {featuresCount === 1 ? 'feature' : 'features'}
-                            </Badge>
+                            <StatusBadge status={`${featuresCount} ${featuresCount === 1 ? 'feature' : 'features'}`} />
                           </DataTable.Cell>
                           {/* Status */}
                           <DataTable.Cell>
-                            <Badge
-                              variant={s?.isActive ? 'success' : 'error'}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={s?.isActive ? 'check-circle' : 'cancel'}
-                                  size={14}
-                                  color={s?.isActive ? '#059669' : '#a33c3c'}
-                                />
-                              }>
-                              {s?.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
+                            <StatusBadge
+                              status={s?.isActive ? 'Active' : 'Inactive'}
+                              type="service-status"
+                            />
                           </DataTable.Cell>
                           {/* Created */}
                           <DataTable.Cell>{formatDate(s?.createdAt)}</DataTable.Cell>

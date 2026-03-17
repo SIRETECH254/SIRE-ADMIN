@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { ThemedView } from '@/components/themed-view';
 import { getInitials, formatDate as formatDateUtil, getRoleNames } from '@/utils';
@@ -77,12 +77,14 @@ export default function ProfileScreen() {
                   : '—'}
               </Text>
               <View className="flex-row items-center gap-2">
-                <Badge variant="info" size="sm">
-                  {rolesDisplay}
-                </Badge>
-                <Badge variant={profile?.isActive ? 'success' : 'error'} size="sm">
-                  {profile?.isActive ? 'Active' : 'Inactive'}
-                </Badge>
+                <StatusBadge
+                  status={rolesDisplay}
+                  type="user-role"
+                />
+                <StatusBadge
+                  status={profile?.isActive ? 'Active' : 'Inactive'}
+                  type="user-status"
+                />
               </View>
             </View>
             <Pressable
@@ -137,9 +139,10 @@ export default function ProfileScreen() {
                   icon="workspace-premium"
                   iconColor={colorScheme === 'dark' ? '#e5e7eb' : '#6b7280'}
                   badgeContent={
-                    <Badge variant="info" size="sm">
-                      {rolesDisplay}
-                    </Badge>
+                    <StatusBadge
+                      status={rolesDisplay}
+                      type="user-role"
+                    />
                   }
                 />
                 <ProfileRow
@@ -147,9 +150,10 @@ export default function ProfileScreen() {
                   icon="shield"
                   iconColor={colorScheme === 'dark' ? '#e5e7eb' : '#6b7280'}
                   badgeContent={
-                    <Badge variant={profile?.isActive ? 'success' : 'error'} size="sm">
-                      {profile?.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
+                    <StatusBadge
+                      status={profile?.isActive ? 'Active' : 'Inactive'}
+                      type="user-status"
+                    />
                   }
                 />
                 <ProfileRow
@@ -157,9 +161,10 @@ export default function ProfileScreen() {
                   icon="verified"
                   iconColor={colorScheme === 'dark' ? '#e5e7eb' : '#6b7280'}
                   badgeContent={
-                    <Badge variant={profile?.emailVerified ? 'success' : 'warning'} size="sm">
-                      {profile?.emailVerified ? 'Verified' : 'Pending'}
-                    </Badge>
+                    <StatusBadge
+                      status={profile?.emailVerified ? 'Verified' : 'Unverified'}
+                      type="verification-status"
+                    />
                   }
                 />
                 <ProfileRow

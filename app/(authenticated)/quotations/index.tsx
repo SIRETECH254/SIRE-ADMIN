@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
 import { useGetClients } from '@/tanstack/useUsers';
@@ -227,21 +227,11 @@ export default function QuotationsScreen() {
   );
 
   const badgeForStatus = (statusValue?: string) => {
-    const key = (statusValue ?? 'draft').toLowerCase() as StatusFilter;
-    const variant = statusVariantMap[key] ?? 'default';
     return (
-      <Badge
-        variant={variant}
-        size="sm"
-        icon={
-          <MaterialIcons
-            name={statusIconMap[key] ?? 'label'}
-            size={14}
-            color="#7b1c1c"
-          />
-        }>
-        {statusLabelMap[key] ?? statusValue ?? 'Draft'}
-      </Badge>
+      <StatusBadge
+        status={statusValue ?? 'draft'}
+        type="quotation-status"
+      />
     );
   };
 

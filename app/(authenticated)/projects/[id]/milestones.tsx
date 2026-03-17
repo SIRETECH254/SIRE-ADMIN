@@ -7,7 +7,7 @@ import { DatePickerModal } from 'react-native-paper-dates';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import { useGetProject, useAddMilestone, useUpdateMilestone, useDeleteMilestone } from '@/tanstack/useProjects';
@@ -342,18 +342,10 @@ export default function MilestonesScreen() {
                           <Text className="font-poppins text-base font-semibold text-gray-900 dark:text-gray-100">
                             {milestone.title ?? '—'}
                           </Text>
-                          <Badge
-                            variant={milestone.completed ? 'success' : 'default'}
-                            size="sm"
-                            icon={
-                              <MaterialIcons
-                                name={milestone.completed ? 'check-circle' : 'schedule'}
-                                size={14}
-                                color={milestone.completed ? '#059669' : '#6b7280'}
-                              />
-                            }>
-                            {milestone.completed ? 'Completed' : 'Pending'}
-                          </Badge>
+                          <StatusBadge
+                            status={milestone.completed ? 'Completed' : 'Pending'}
+                            type="project-status"
+                          />
                         </View>
                         {milestone.description ? (
                           <Text className="font-inter text-sm text-gray-600 dark:text-gray-400">

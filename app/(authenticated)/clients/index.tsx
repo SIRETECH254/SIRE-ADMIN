@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
 import { useGetClients, useDeleteUser } from '@/tanstack/useUsers';
@@ -354,33 +354,17 @@ export default function ClientsScreen() {
                           <DataTable.Cell>{c?.company ?? '—'}</DataTable.Cell>
                           {/* Verified */}
                           <DataTable.Cell>
-                            <Badge
-                              variant={c?.emailVerified ? 'success' : 'error'}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={c?.emailVerified ? 'verified' : 'error-outline'}
-                                  size={14}
-                                  color={c?.emailVerified ? '#059669' : '#a33c3c'}
-                                />
-                              }>
-                              {c?.emailVerified ? 'Verified' : 'Unverified'}
-                            </Badge>
+                            <StatusBadge
+                              status={c?.emailVerified ? 'Verified' : 'Unverified'}
+                              type="verification-status"
+                            />
                           </DataTable.Cell>
                           {/* Status */}
                           <DataTable.Cell>
-                            <Badge
-                              variant={c?.isActive ? 'success' : 'error'}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={c?.isActive ? 'verified-user' : 'block'}
-                                  size={14}
-                                  color={c?.isActive ? '#059669' : '#a33c3c'}
-                                />
-                              }>
-                              {c?.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
+                            <StatusBadge
+                              status={c?.isActive ? 'Active' : 'Inactive'}
+                              type="client-status"
+                            />
                           </DataTable.Cell>
                           {/* Created */}
                           <DataTable.Cell>{formatDate(c?.createdAt)}</DataTable.Cell>

@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import {
@@ -179,18 +179,10 @@ export default function InvoiceDetailScreen() {
                 <ThemedText type="title">{invoice?.invoiceNumber ?? 'Invoice'}</ThemedText>
                 <Text className="text-gray-600">{formatDate(createdAt)}</Text>
               </View>
-              <Badge
-                variant={statusConfig.variant}
-                size="md"
-                icon={
-                  <MaterialIcons
-                    name={statusConfig.icon}
-                    size={16}
-                    color={statusConfig.variant === 'error' ? '#a33c3c' : '#7b1c1c'}
-                  />
-                }>
-                {statusConfig.label}
-              </Badge>
+              <StatusBadge
+                status={statusValue}
+                type="invoice-status"
+              />
             </View>
             {inlineStatus ? (
               <Alert variant={inlineStatus.type} message={inlineStatus.text} className="w-full" />
@@ -337,11 +329,10 @@ export default function InvoiceDetailScreen() {
                           {payment.paymentMethod ?? 'Payment'} • {formatDate(payment.paymentDate)}
                         </Text>
                       </View>
-                      <Badge
-                        variant={payment.status === 'completed' ? 'success' : 'info'}
-                        size="sm">
-                        {payment.status ?? 'completed'}
-                      </Badge>
+                      <StatusBadge
+                        status={payment.status === 'completed' ? 'paid' : 'pending'}
+                        type="payment-status"
+                      />
                     </View>
                   );
                 })

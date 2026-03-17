@@ -5,7 +5,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
@@ -97,18 +97,10 @@ export default function ServiceDetailScreen() {
               <ThemedText type="title">{service?.title ?? 'Service'}</ThemedText>
               <Text className="text-gray-600 mt-1">Service ID: {id}</Text>
             </View>
-            <Badge
-              variant={service?.isActive ? 'success' : 'error'}
-              size="md"
-              icon={
-                <MaterialIcons
-                  name={service?.isActive ? 'check-circle' : 'cancel'}
-                  size={16}
-                  color={service?.isActive ? '#059669' : '#a33c3c'}
-                />
-              }>
-              {service?.isActive ? 'Active' : 'Inactive'}
-            </Badge>
+            <StatusBadge
+              status={service?.isActive ? 'Active' : 'Inactive'}
+              type="service-status"
+            />
           </View>
 
           {errorMessage ? (

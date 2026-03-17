@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
 import { useGetPayments, useDeletePayment } from '@/tanstack/usePayments';
@@ -363,38 +363,13 @@ export default function PaymentsScreen() {
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell>
-                            <Badge
-                              variant={method === 'mpesa' ? 'info' : 'default'}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={method === 'mpesa' ? 'phone-android' : 'credit-card'}
-                                  size={14}
-                                  color="#7b1c1c"
-                                />
-                              }>
-                              {method === 'mpesa' ? 'M-Pesa' : method === 'paystack' ? 'Paystack' : method}
-                            </Badge>
+                            <StatusBadge status={method === 'mpesa' ? 'M-Pesa' : method === 'paystack' ? 'Paystack' : method} />
                           </DataTable.Cell>
                           <DataTable.Cell>
-                            <Badge
-                              variant={statusConfig.variant}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={statusConfig.icon}
-                                  size={14}
-                                  color={
-                                    statusConfig.variant === 'error'
-                                      ? '#a33c3c'
-                                      : statusConfig.variant === 'success'
-                                      ? '#059669'
-                                      : '#7b1c1c'
-                                  }
-                                />
-                              }>
-                              {statusConfig.label}
-                            </Badge>
+                            <StatusBadge
+                              status={statusValue}
+                              type="payment-status"
+                            />
                           </DataTable.Cell>
                           <DataTable.Cell>
                             <Text className="font-inter text-sm text-gray-900">

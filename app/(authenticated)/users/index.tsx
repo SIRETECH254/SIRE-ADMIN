@@ -6,7 +6,7 @@ import { Link, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import { useGetAllUsers, useDeleteUser } from '@/tanstack/useUsers';
 import { Picker } from '@react-native-picker/picker';
@@ -391,27 +391,17 @@ export default function UsersScreen() {
                           <DataTable.Cell>{u?.email ?? '—'}</DataTable.Cell>
                           {/* Role cell */}
                           <DataTable.Cell>
-                            <Badge
-                              variant="info"
-                              size="sm"
-                              icon={<MaterialIcons name="workspace-premium" size={14} color="#000000" />}>
-                              {getRoleNames(u).join(', ') || (u?.role ?? '—')}
-                            </Badge>
+                            <StatusBadge
+                              status={getRoleNames(u).join(', ') || (u?.role ?? '—')}
+                              type="user-role"
+                            />
                           </DataTable.Cell>
                           {/* Status cell */}
                           <DataTable.Cell>
-                            <Badge
-                              variant={u?.isActive ? 'success' : 'error'}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={u?.isActive ? 'verified-user' : 'block'}
-                                  size={14}
-                                  color={u?.isActive ? '#059669' : '#a33c3c'}
-                                />
-                              }>
-                              {u?.isActive ? 'Active' : 'Inactive'}
-                            </Badge>
+                            <StatusBadge
+                              status={u?.isActive ? 'Active' : 'Inactive'}
+                              type="user-status"
+                            />
                           </DataTable.Cell>
                           {/* Created date cell */}
                           <DataTable.Cell>{formatDate(u?.createdAt)}</DataTable.Cell>

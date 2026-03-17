@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
 import { useGetAllRoles, useDeleteRole } from '@/tanstack/useRoles';
@@ -303,18 +303,10 @@ export default function RolesScreen() {
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell>
-                            <Badge
-                              variant={role?.isActive !== false ? 'success' : 'error'}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={role?.isActive !== false ? 'check-circle' : 'block'}
-                                  size={14}
-                                  color={role?.isActive !== false ? '#059669' : '#a33c3c'}
-                                />
-                              }>
-                              {role?.isActive !== false ? 'Active' : 'Inactive'}
-                            </Badge>
+                            <StatusBadge
+                              status={role?.isActive !== false ? 'Active' : 'Inactive'}
+                              type="role-status"
+                            />
                           </DataTable.Cell>
                           <DataTable.Cell>{formatDate(role?.createdAt)}</DataTable.Cell>
                           <DataTable.Cell numeric>

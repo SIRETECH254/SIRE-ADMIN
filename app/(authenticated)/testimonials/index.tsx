@@ -7,7 +7,7 @@ import { Picker } from '@react-native-picker/picker';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import {
   useGetTestimonials,
@@ -353,27 +353,15 @@ export default function TestimonialsScreen() {
                       </View>
                     </View>
                     <View className="flex-row items-center gap-2">
-                      <Badge
-                        variant={isApproved ? 'success' : 'warning'}
-                        size="sm"
-                        icon={
-                          <MaterialIcons
-                            name={isApproved ? 'verified' : 'pending'}
-                            size={14}
-                            color={isApproved ? '#059669' : '#f59e0b'}
-                          />
-                        }>
-                        {isApproved ? 'Approved' : 'Pending'}
-                      </Badge>
+                      <StatusBadge
+                        status={isApproved ? 'Approved' : 'Pending'}
+                        type="approval-status"
+                      />
                       {isPublished && (
-                        <Badge
-                          variant="info"
-                          size="sm"
-                          icon={
-                            <MaterialIcons name="publish" size={14} color="#2563eb" />
-                          }>
-                          Published
-                        </Badge>
+                        <StatusBadge
+                          status="Published"
+                          type="publish-status"
+                        />
                       )}
                     </View>
                   </View>

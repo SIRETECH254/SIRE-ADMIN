@@ -6,7 +6,6 @@ import { useRouter } from 'expo-router';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
 import { useCreateRole } from '@/tanstack/useRoles';
 
 type InlineStatus =

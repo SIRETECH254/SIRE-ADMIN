@@ -6,7 +6,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { ThemedView } from '@/components/themed-view';
 import { getInitials, formatDate as formatDateUtil, getRoleNames } from '@/utils';
 import { ThemedText } from '@/components/themed-text';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { useGetUserById } from '@/tanstack/useUsers';
@@ -68,24 +68,14 @@ export default function UserDetailsScreen() {
                   : '—'}
               </Text>
               <View className="flex-row items-center gap-2">
-                <Badge
-                  variant="info"
-                  size="sm"
-                  icon={<MaterialIcons name="workspace-premium" size={14} color="#000000" />}>
-                  {rolesDisplay}
-                </Badge>
-                <Badge
-                  variant={user?.isActive ? 'success' : 'error'}
-                  size="sm"
-                  icon={
-                    <MaterialIcons
-                      name={user?.isActive ? 'verified-user' : 'block'}
-                      size={14}
-                      color={user?.isActive ? '#059669' : '#a33c3c'}
-                    />
-                  }>
-                  {user?.isActive ? 'Active' : 'Inactive'}
-                </Badge>
+                <StatusBadge
+                  status={rolesDisplay}
+                  type="user-role"
+                />
+                <StatusBadge
+                  status={user?.isActive ? 'Active' : 'Inactive'}
+                  type="user-status"
+                />
               </View>
             </View>
           </View>
@@ -125,9 +115,10 @@ export default function UserDetailsScreen() {
                       Status
                     </Text>
                   </View>
-                  <Badge variant={user?.isActive ? 'success' : 'error'} size="sm">
-                    {user?.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <StatusBadge
+                    status={user?.isActive ? 'Active' : 'Inactive'}
+                    type="user-status"
+                  />
                 </View>
                 <InfoRow icon="event-note" label="Created" value={formatDate(user?.createdAt)} />
                 <InfoRow icon="update" label="Updated" value={formatDate(user?.updatedAt)} />

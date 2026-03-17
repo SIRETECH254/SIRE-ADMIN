@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { useAuth } from '@/contexts/AuthContext';
 import { useGetAdminDashboard, useGetClientDashboard } from '@/tanstack/useDashboard';
@@ -200,18 +200,7 @@ export default function DashboardScreen() {
                           : '—'}
                       </Text>
                     </View>
-                    <Badge
-                      variant={getProjectStatusVariant(item.status)}
-                      size="sm"
-                      icon={
-                        <MaterialIcons
-                          name={getProjectStatusIcon(item.status)}
-                          size={14}
-                          color="#7b1c1c"
-                        />
-                      }>
-                      {item.status ?? 'pending'}
-                    </Badge>
+                    <StatusBadge status={item.status ?? 'pending'} type="project-status" />
                   </View>
                 )}
               />
@@ -237,18 +226,7 @@ export default function DashboardScreen() {
                         {formatCurrency(item.totalAmount ?? item.total ?? 0)}
                       </Text>
                     </View>
-                    <Badge
-                      variant={getInvoiceStatusVariant(item.status)}
-                      size="sm"
-                      icon={
-                        <MaterialIcons
-                          name={getInvoiceStatusIcon(item.status)}
-                          size={14}
-                          color="#7b1c1c"
-                        />
-                      }>
-                      {item.status ?? 'draft'}
-                    </Badge>
+                    <StatusBadge status={item.status ?? 'draft'} type="invoice-status" />
                   </View>
                 )}
               />
@@ -274,18 +252,7 @@ export default function DashboardScreen() {
                         {formatCurrency(item.amount ?? 0, item.currency ?? 'KES')} • {formatDate(item.paymentDate ?? item.createdAt)}
                       </Text>
                     </View>
-                    <Badge
-                      variant={getPaymentStatusVariant(item.status)}
-                      size="sm"
-                      icon={
-                        <MaterialIcons
-                          name={getPaymentStatusIcon(item.status)}
-                          size={14}
-                          color="#7b1c1c"
-                        />
-                      }>
-                      {item.status ?? 'pending'}
-                    </Badge>
+                    <StatusBadge status={item.status ?? 'pending'} type="payment-status" />
                   </View>
                 )}
               />
@@ -366,72 +333,4 @@ function ActivitySection({
       </View>
     </View>
   );
-}
-
-function getProjectStatusVariant(status?: string): 'default' | 'info' | 'success' | 'warning' | 'error' {
-  const statusMap: Record<string, 'default' | 'info' | 'success' | 'warning' | 'error'> = {
-    pending: 'info',
-    in_progress: 'info',
-    on_hold: 'warning',
-    completed: 'success',
-    cancelled: 'error',
-  };
-  return statusMap[status?.toLowerCase() ?? ''] ?? 'default';
-}
-
-function getProjectStatusIcon(status?: string): keyof typeof MaterialIcons.glyphMap {
-  const iconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
-    pending: 'schedule',
-    in_progress: 'play-circle',
-    on_hold: 'pause-circle',
-    completed: 'check-circle',
-    cancelled: 'cancel',
-  };
-  return iconMap[status?.toLowerCase() ?? ''] ?? 'help';
-}
-
-function getInvoiceStatusVariant(status?: string): 'default' | 'info' | 'success' | 'warning' | 'error' {
-  const statusMap: Record<string, 'default' | 'info' | 'success' | 'warning' | 'error'> = {
-    draft: 'default',
-    sent: 'info',
-    paid: 'success',
-    partially_paid: 'warning',
-    overdue: 'error',
-    cancelled: 'error',
-  };
-  return statusMap[status?.toLowerCase() ?? ''] ?? 'default';
-}
-
-function getInvoiceStatusIcon(status?: string): keyof typeof MaterialIcons.glyphMap {
-  const iconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
-    draft: 'description',
-    sent: 'send',
-    paid: 'check-circle',
-    partially_paid: 'payments',
-    overdue: 'warning',
-    cancelled: 'cancel',
-  };
-  return iconMap[status?.toLowerCase() ?? ''] ?? 'description';
-}
-
-function getPaymentStatusVariant(status?: string): 'default' | 'info' | 'success' | 'warning' | 'error' {
-  const statusMap: Record<string, 'default' | 'info' | 'success' | 'warning' | 'error'> = {
-    pending: 'info',
-    processing: 'info',
-    completed: 'success',
-    failed: 'error',
-    cancelled: 'error',
-  };
-  return statusMap[status?.toLowerCase() ?? ''] ?? 'default';
-}
-
-function getPaymentStatusIcon(status?: string): keyof typeof MaterialIcons.glyphMap {
-  const iconMap: Record<string, keyof typeof MaterialIcons.glyphMap> = {
-    pending: 'schedule',
-    processing: 'sync',
-    completed: 'check-circle',
-    failed: 'error',
-    cancelled: 'cancel',
-  };
-  return iconMap[status?.toLowerCase() ?? ''] ?? 'schedule';
 }

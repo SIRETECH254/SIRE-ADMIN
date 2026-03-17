@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import {
@@ -239,30 +239,14 @@ export default function TestimonialDetailScreen() {
               Status
             </Text>
             <View className="flex-row items-center gap-3 flex-wrap">
-              <Badge
-                variant={isApproved ? 'success' : 'warning'}
-                size="md"
-                icon={
-                  <MaterialIcons
-                    name={isApproved ? 'verified' : 'pending'}
-                    size={16}
-                    color={isApproved ? '#059669' : '#f59e0b'}
-                  />
-                }>
-                {isApproved ? 'Approved' : 'Pending Approval'}
-              </Badge>
-              <Badge
-                variant={isPublished ? 'info' : 'default'}
-                size="md"
-                icon={
-                  <MaterialIcons
-                    name={isPublished ? 'publish' : 'unpublished'}
-                    size={16}
-                    color={isPublished ? '#2563eb' : '#6b7280'}
-                  />
-                }>
-                {isPublished ? 'Published' : 'Unpublished'}
-              </Badge>
+              <StatusBadge
+                status={isApproved ? 'Approved' : 'Pending'}
+                type="approval-status"
+              />
+              <StatusBadge
+                status={isPublished ? 'Published' : 'Unpublished'}
+                type="publish-status"
+              />
             </View>
           </View>
 

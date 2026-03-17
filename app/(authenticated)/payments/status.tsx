@@ -7,7 +7,7 @@ import io, { Socket } from 'socket.io-client';
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { useGetPayment, useQueryMpesaStatus } from '@/tanstack/usePayments';
 import { formatCurrency, formatDate } from '@/utils';
@@ -363,36 +363,11 @@ export default function PaymentStatusScreen() {
                 </Text>
               </View>
               <View className="flex-row items-center gap-2">
-                <Badge
-                  variant={isMpesa ? 'info' : 'default'}
-                  size="md"
-                  icon={
-                    <MaterialIcons
-                      name={isMpesa ? 'phone-android' : 'credit-card'}
-                      size={16}
-                      color="#7b1c1c"
-                    />
-                  }>
-                  {isMpesa ? 'M-Pesa' : 'Paystack'}
-                </Badge>
-                <Badge
-                  variant={statusConfig.variant}
-                  size="md"
-                  icon={
-                    <MaterialIcons
-                      name={statusConfig.icon}
-                      size={16}
-                      color={
-                        statusConfig.variant === 'error'
-                          ? '#a33c3c'
-                          : statusConfig.variant === 'success'
-                          ? '#059669'
-                          : '#7b1c1c'
-                      }
-                    />
-                  }>
-                  {statusConfig.label}
-                </Badge>
+                <StatusBadge status={isMpesa ? 'M-Pesa' : 'Paystack'} />
+                <StatusBadge
+                  status={currentStatus}
+                  type="payment-status"
+                />
               </View>
             </View>
             {errorMessage ? (
@@ -474,11 +449,9 @@ export default function PaymentStatusScreen() {
                       Socket.IO
                     </Text>
                   </View>
-                  <Badge
-                    variant={socketConnected ? 'success' : 'default'}
-                    size="sm">
-                    {socketConnected ? 'Connected' : 'Disconnected'}
-                  </Badge>
+                  <StatusBadge
+                    status={socketConnected ? 'Connected' : 'Disconnected'}
+                  />
                 </View>
                 {(pollingActiveRef.current || isFallbackActive) && (
                   <View className="flex-row items-center justify-between">
@@ -488,9 +461,7 @@ export default function PaymentStatusScreen() {
                         {isFallbackActive ? 'Checking payment status...' : 'API Polling'}
                       </Text>
                     </View>
-                    <Badge variant="info" size="sm">
-                      Active
-                    </Badge>
+                    <StatusBadge status="Active" />
                   </View>
                 )}
                 {socketError && (

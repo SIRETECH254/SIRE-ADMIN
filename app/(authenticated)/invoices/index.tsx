@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import Pagination from '@/components/table/Pagination';
 import { useGetInvoices } from '@/tanstack/useInvoices';
 import { useGetClients } from '@/tanstack/useUsers';
@@ -345,18 +345,10 @@ export default function InvoicesScreen() {
                             </Text>
                           </DataTable.Cell>
                           <DataTable.Cell>
-                            <Badge
-                              variant={statusConfig.variant}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={statusConfig.icon}
-                                  size={14}
-                                  color="#7b1c1c"
-                                />
-                              }>
-                              {statusConfig.label}
-                            </Badge>
+                            <StatusBadge
+                              status={statusValue}
+                              type="invoice-status"
+                            />
                           </DataTable.Cell>
                           <DataTable.Cell>{formatCurrency(totalAmount)}</DataTable.Cell>
                           <DataTable.Cell>{formatDate(dueDate)}</DataTable.Cell>

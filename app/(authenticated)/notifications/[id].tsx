@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import {
@@ -155,9 +155,10 @@ export default function NotificationDetailScreen() {
                 <ThemedText type="title">Notification Details</ThemedText>
                 <Text className="text-gray-600">{formatDate(createdAt)}</Text>
               </View>
-              <Badge variant={categoryVariant} size="md">
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </Badge>
+              <StatusBadge
+                status={category}
+                type="notification-category"
+              />
             </View>
             {inlineStatus ? (
               <Alert variant={inlineStatus.type} message={inlineStatus.text} className="w-full" />

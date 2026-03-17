@@ -5,7 +5,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { useGetRole, useGetUsersByRole } from '@/tanstack/useRoles';
@@ -62,18 +62,10 @@ export default function RoleDetailsScreen() {
                 {role?.displayName ?? role?.name ?? '—'}
               </Text>
               <View className="flex-row items-center gap-2">
-                <Badge
-                  variant={role?.isActive !== false ? 'success' : 'error'}
-                  size="sm"
-                  icon={
-                    <MaterialIcons
-                      name={role?.isActive !== false ? 'check-circle' : 'block'}
-                      size={14}
-                      color={role?.isActive !== false ? '#059669' : '#a33c3c'}
-                    />
-                  }>
-                  {role?.isActive !== false ? 'Active' : 'Inactive'}
-                </Badge>
+                <StatusBadge
+                  status={role?.isActive !== false ? 'Active' : 'Inactive'}
+                  type="role-status"
+                />
               </View>
             </View>
           </View>

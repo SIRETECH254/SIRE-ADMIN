@@ -5,7 +5,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { ThemedView } from '@/components/themed-view';
 import { ThemedText } from '@/components/themed-text';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Alert } from '@/components/ui/Alert';
 import { Loading } from '@/components/ui/Loading';
 import { useGetUserById } from '@/tanstack/useUsers';
@@ -65,30 +65,14 @@ export default function ClientDetailsScreen() {
                   : '—'}
               </Text>
               <View className="flex-row items-center gap-2">
-                <Badge
-                  variant={client?.emailVerified ? 'success' : 'error'}
-                  size="sm"
-                  icon={
-                    <MaterialIcons
-                      name={client?.emailVerified ? 'verified' : 'error-outline'}
-                      size={14}
-                      color={client?.emailVerified ? '#059669' : '#a33c3c'}
-                    />
-                  }>
-                  {client?.emailVerified ? 'Verified' : 'Unverified'}
-                </Badge>
-                <Badge
-                  variant={client?.isActive ? 'success' : 'error'}
-                  size="sm"
-                  icon={
-                    <MaterialIcons
-                      name={client?.isActive ? 'verified-user' : 'block'}
-                      size={14}
-                      color={client?.isActive ? '#059669' : '#a33c3c'}
-                    />
-                  }>
-                  {client?.isActive ? 'Active' : 'Inactive'}
-                </Badge>
+                <StatusBadge
+                  status={client?.emailVerified ? 'Verified' : 'Unverified'}
+                  type="verification-status"
+                />
+                <StatusBadge
+                  status={client?.isActive ? 'Active' : 'Inactive'}
+                  type="client-status"
+                />
               </View>
             </View>
           </View>
@@ -139,18 +123,10 @@ export default function ClientDetailsScreen() {
                       Verified
                     </Text>
                   </View>
-                  <Badge
-                    variant={client?.emailVerified ? 'success' : 'error'}
-                    size="sm"
-                    icon={
-                      <MaterialIcons
-                        name={client?.emailVerified ? 'verified' : 'error-outline'}
-                        size={14}
-                        color={client?.emailVerified ? '#059669' : '#a33c3c'}
-                      />
-                    }>
-                    {client?.emailVerified ? 'Verified' : 'Unverified'}
-                  </Badge>
+                  <StatusBadge
+                    status={client?.emailVerified ? 'Verified' : 'Unverified'}
+                    type="verification-status"
+                  />
                 </View>
                 <View className="flex-row items-center justify-between">
                   <View className="flex-row items-center gap-2">
@@ -159,18 +135,10 @@ export default function ClientDetailsScreen() {
                       Status
                     </Text>
                   </View>
-                  <Badge
-                    variant={client?.isActive ? 'success' : 'error'}
-                    size="sm"
-                    icon={
-                      <MaterialIcons
-                        name={client?.isActive ? 'verified-user' : 'block'}
-                        size={14}
-                        color={client?.isActive ? '#059669' : '#a33c3c'}
-                      />
-                    }>
-                    {client?.isActive ? 'Active' : 'Inactive'}
-                  </Badge>
+                  <StatusBadge
+                    status={client?.isActive ? 'Active' : 'Inactive'}
+                    type="client-status"
+                  />
                 </View>
                 <InfoRow icon="event-note" label="Created" value={formatDate(client?.createdAt)} />
                 <InfoRow icon="update" label="Updated" value={formatDate(client?.updatedAt)} />

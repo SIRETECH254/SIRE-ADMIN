@@ -6,7 +6,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Loading } from '@/components/ui/Loading';
 import { Modal } from '@/components/ui/Modal';
 import {
@@ -149,9 +149,10 @@ export default function ContactDetailScreen() {
                 <ThemedText type="title">Contact Message</ThemedText>
                 <Text className="text-gray-600">{formatDate(createdAt)}</Text>
               </View>
-              <Badge variant={statusVariant} size="md">
-                {status.charAt(0).toUpperCase() + status.slice(1)}
-              </Badge>
+              <StatusBadge
+                status={status}
+                type="contact-status"
+              />
             </View>
             {inlineStatus ? (
               <Alert variant={inlineStatus.type} message={inlineStatus.text} className="w-full" />

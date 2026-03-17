@@ -8,7 +8,7 @@ import { DataTable } from 'react-native-paper';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { Alert } from '@/components/ui/Alert';
-import { Badge } from '@/components/ui/Badge';
+import StatusBadge from '@/components/ui/StatusBadge';
 import { Modal } from '@/components/ui/Modal';
 import Pagination from '@/components/table/Pagination';
 import { useGetProjects, useDeleteProject } from '@/tanstack/useProjects';
@@ -430,43 +430,17 @@ export default function ProjectsScreen() {
                           </DataTable.Cell>
                           {/* Status */}
                           <DataTable.Cell>
-                            <Badge
-                              variant={getStatusVariant(p?.status)}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={getStatusIcon(p?.status) as any}
-                                  size={14}
-                                  color={
-                                    p?.status === 'completed'
-                                      ? '#059669'
-                                      : p?.status === 'in_progress'
-                                      ? '#2563eb'
-                                      : p?.status === 'on_hold'
-                                      ? '#f59e0b'
-                                      : p?.status === 'cancelled'
-                                      ? '#dc2626'
-                                      : '#6b7280'
-                                  }
-                                />
-                              }>
-                              {p?.status?.replace('_', ' ') ?? 'pending'}
-                            </Badge>
+                            <StatusBadge
+                              status={p?.status ?? 'pending'}
+                              type="project-status"
+                            />
                           </DataTable.Cell>
                           {/* Priority */}
                           <DataTable.Cell>
-                            <Badge
-                              variant={getPriorityVariant(p?.priority)}
-                              size="sm"
-                              icon={
-                                <MaterialIcons
-                                  name={getPriorityIcon(p?.priority) as any}
-                                  size={14}
-                                  color={getPriorityColor(p?.priority)}
-                                />
-                              }>
-                              {p?.priority ?? 'low'}
-                            </Badge>
+                            <StatusBadge
+                              status={p?.priority ?? 'low'}
+                              type="priority-status"
+                            />
                           </DataTable.Cell>
                           {/* Progress */}
                           <DataTable.Cell>
